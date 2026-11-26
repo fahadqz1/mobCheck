@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(cd \"$env:USERPROFILE\\\\Desktop\\\\MobCheck\"; git log --oneline; git status)"
+    ]
+  }
+}

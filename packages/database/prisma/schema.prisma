@@ -1,0 +1,1182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// AUTHENTICATION & USERS
+// ============================================================================
+
+model User {
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  passwordHash          String
+  firstName             String?
+  lastName              String?
+  phone                 String?
+  avatarUrl             String?
+
+  // Role assignment
+  role                  UserRole @default(CUSTOMER)
+  status                UserStatus @default(ACTIVE)
+
+  // Email verification
+  emailVerified         Boolean  @default(false)
+  emailVerifiedAt       DateTime?
+
+  // Relationships to role-specific profiles
+  customerProfile       CustomerProfile?
+  shopOwnerProfile      ShopOwnerProfile?
+  inspectorProfile      Inspector?
+
+  // Related data
+  sessions              Session[]
+  emailTokens           EmailToken[]
+  listings              PhoneListing[]
+  listingInquiries      ListingInquiry[]
+  inspectionBookings    InspectionBooking[] @relation("BookingCustomer")
+  inspectionBookingsShop InspectionBooking[] @relation("BookingShop")
+  payments              Payment[]
+  reviews               Review[]
+  complaints            Complaint[]
+  adminActions          AdminAction[]
+  bannedShops           ShopBan[]
+  verifiedShops         Shop[] @relation("VerifiedBy")
+  verifiedInspectors    Inspector[] @relation("VerifiedBy")
+
+  // Audit
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  lastLogin             DateTime?
+  deletedAt             DateTime?
+
+  @@index([role, status])
+  @@index([createdAt])
+  @@index([email])
+}
+
+model CustomerProfile {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Profile
+  displayName           String?
+  bio                   String?
+  preferredContact      ContactPreference @default(EMAIL)
+
+  // Address
+  city                  String?
+  area                  String?
+  addressLine1          String?
+  addressLine2          String?
+  zipCode               String?
+
+  // Statistics (denormalized for performance)
+  totalListings         Int      @default(0)
+  totalInspections      Int      @default(0)
+  averageRating         Decimal? @db.Decimal(2, 1)
+
+  // Preferences
+  notificationsEmail    Boolean  @default(true)
+  notificationsWhatsapp Boolean  @default(false)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([city, area])
+}
+
+model ShopOwnerProfile {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Verification
+  cnic                  String?
+  phoneVerified         Boolean  @default(false)
+  phoneVerifiedAt       DateTime?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model Session {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token                 String   @unique
+  expiresAt             DateTime
+
+  ipAddress             String?
+  userAgent             String?
+
+  createdAt             DateTime @default(now())
+
+  @@index([userId, expiresAt])
+  @@index([token])
+}
+
+model EmailToken {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token                 String   @unique
+  type                  EmailTokenType
+  expiresAt             DateTime
+  usedAt                DateTime?
+
+  createdAt             DateTime @default(now())
+
+  @@index([userId, type, expiresAt])
+  @@index([token])
+}
+
+// ============================================================================
+// MARKETPLACE
+// ============================================================================
+
+model Brand {
+  id                    String   @id @default(cuid())
+  name                  String   @unique
+  slug                  String   @unique
+  logoUrl               String?
+  countryOfOrigin       String?
+
+  models                Model[]
+  listings              PhoneListing[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([slug])
+}
+
+model Model {
+  id                    String   @id @default(cuid())
+  brandId               String
+  brand                 Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  name                  String
+  slug                  String
+  releaseYear           Int?
+
+  baseStorageGb         Int?
+  baseRamGb             Int?
+  storageOptions        String[] // ["128", "256", "512"]
+  colors                String[]
+
+  category              ModelCategory
+  os                    DeviceOS
+
+  listings              PhoneListing[]
+  inspectionBookings    InspectionBooking[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([brandId, slug])
+  @@index([brandId, slug])
+}
+
+model PhoneListing {
+  id                    String   @id @default(cuid())
+
+  // Seller
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id])
+  shopId                String?
+  shop                  Shop?    @relation(fields: [shopId], references: [id])
+
+  // Device details
+  brandId               String
+  brand                 Brand    @relation(fields: [brandId], references: [id])
+  modelId               String
+  model                 Model    @relation(fields: [modelId], references: [id])
+  storageGb            Int?
+  ramGb                 Int?
+  color                 String?
+
+  // Condition & pricing
+  condition             PhoneCondition
+  pricePkr              Decimal  @db.Decimal(10, 2)
+
+  // Device status
+  ptaStatus             DeviceStatus @default(UNKNOWN)
+  imeiLast4             String?
+  imeiVerified          Boolean  @default(false)
+
+  // Accessories
+  hasBox                Boolean  @default(false)
+  hasCharger            Boolean  @default(false)
+  hasAccessories        String[]
+  warrantyInfo          String?
+
+  // Listing info
+  title                 String
+  description           String?
+  locationCity          String
+  locationArea          String
+
+  // Contact
+  sellerContactPreference ContactPreference
+
+  // Status
+  status                ListingStatus @default(ACTIVE)
+  listedAt              DateTime @default(now())
+
+  // Statistics
+  viewCount             Int      @default(0)
+  inquiryCount          Int      @default(0)
+
+  photos                ListingPhoto[]
+  inquiries             ListingInquiry[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([brandId, modelId])
+  @@index([ptaStatus])
+  @@index([locationCity, locationArea])
+}
+
+model ListingPhoto {
+  id                    String   @id @default(cuid())
+  listingId             String
+  listing               PhoneListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  storageKey            String
+  storageUrl            String?
+  mimeType              String
+  fileSizeBytes         Int?
+
+  uploadSequence        Int
+  isPrimary             Boolean  @default(false)
+
+  createdAt             DateTime @default(now())
+
+  @@index([listingId, uploadSequence])
+}
+
+model ListingInquiry {
+  id                    String   @id @default(cuid())
+  listingId             String
+  listing               PhoneListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  customerId            String
+  customer              User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  message               String?
+  status                InquiryStatus @default(OPEN)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([listingId, status])
+  @@index([customerId])
+}
+
+// ============================================================================
+// SHOPS & VENDORS
+// ============================================================================
+
+model Shop {
+  id                    String   @id @default(cuid())
+  ownerId               String
+  owner                 User     @relation(fields: [ownerId], references: [id])
+
+  // Business info
+  name                  String
+  displayName           String?
+  slug                  String   @unique
+  description           String?
+
+  // Address
+  city                  String
+  area                  String
+  addressLine1          String
+  addressLine2          String?
+  zipCode               String?
+  latitude              Decimal? @db.Decimal(10, 8)
+  longitude             Decimal? @db.Decimal(11, 8)
+
+  // Contact
+  phone                 String
+  whatsapp              String?
+  email                 String
+
+  // Operations
+  openingHour           String? // "09:00"
+  closingHour           String? // "21:00"
+  weeklyHolidays        String[]
+
+  // Verification
+  status                ShopStatus @default(PENDING)
+  verifiedAt            DateTime?
+  verifiedById          String?
+  verifiedBy            User?    @relation("VerifiedBy", fields: [verifiedById], references: [id])
+
+  // Documents
+  businessLicenseUrl    String?
+  ownerIdUrl            String?
+
+  // Subscription
+  trialStartsAt         DateTime @default(now())
+  trialEndsAt           DateTime @default(dbgenerated("now() + interval '30 days'"))
+
+  // Statistics (denormalized)
+  totalInspections      Int      @default(0)
+  completedInspections  Int      @default(0)
+  cancelledInspections  Int      @default(0)
+  averageRating         Decimal? @db.Decimal(2, 1)
+  totalReviews          Int      @default(0)
+
+  // Relations
+  subscriptions         ShopSubscription[]
+  services              ShopService[]
+  documents             ShopDocument[]
+  listings              PhoneListing[]
+  inspectors            Inspector[]
+  inspectionBookings    InspectionBooking[]
+  payoutLedger          PayoutLedger[]
+  reviews               Review[]
+  complaints            Complaint[]
+  bans                  ShopBan[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([slug])
+  @@index([city, area, status])
+  @@index([status])
+}
+
+model ShopSubscription {
+  id                    String   @id @default(cuid())
+  shopId                String   @unique
+  shop                  Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  status                SubscriptionStatus @default(TRIAL)
+  currentPeriodStart    DateTime
+  currentPeriodEnd      DateTime
+
+  pricePkr              Decimal  @db.Decimal(8, 2)
+  autoRenew             Boolean  @default(true)
+
+  lastPaymentDate       DateTime?
+  lastPaymentId         String?
+  lastPayment           Payment? @relation(fields: [lastPaymentId], references: [id])
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([shopId, status])
+  @@index([currentPeriodEnd])
+}
+
+model ShopService {
+  id                    String   @id @default(cuid())
+  shopId                String
+  shop                  Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  name                  String
+  description           String?
+  pricePkr              Decimal  @db.Decimal(8, 2)
+
+  status                ServiceStatus @default(ACTIVE)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([shopId, status])
+}
+
+model ShopDocument {
+  id                    String   @id @default(cuid())
+  shopId                String
+  shop                  Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  documentType          DocumentType
+  storageUrl            String
+  status                DocumentStatus @default(PENDING)
+  rejectedReason        String?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([shopId, status])
+}
+
+// ============================================================================
+// INSPECTORS
+// ============================================================================
+
+model Inspector {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopId                String
+  shop                  Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  // Verification
+  status                InspectorStatus @default(ACTIVE)
+  verified              Boolean  @default(false)
+  verifiedAt            DateTime?
+  verifiedById          String?
+  verifiedBy            User?    @relation("VerifiedBy", fields: [verifiedById], references: [id])
+
+  // Performance
+  totalInspections      Int      @default(0)
+  completedInspections  Int      @default(0)
+  averageRating         Decimal? @db.Decimal(2, 1)
+
+  // Availability
+  availableMonday       Boolean  @default(true)
+  availableTuesday      Boolean  @default(true)
+  availableWednesday    Boolean  @default(true)
+  availableThursday     Boolean  @default(true)
+  availableFriday       Boolean  @default(true)
+  availableSaturday     Boolean  @default(true)
+  availableSunday       Boolean  @default(false)
+
+  startTime             String?
+  endTime               String?
+
+  inspectionBookings    InspectionBooking[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([shopId, status])
+}
+
+// ============================================================================
+// INSPECTION BOOKINGS & RESULTS
+// ============================================================================
+
+model InspectionBooking {
+  id                    String   @id @default(cuid())
+
+  // Parties
+  customerId            String
+  customer              User     @relation("BookingCustomer", fields: [customerId], references: [id])
+  shopId                String
+  shop                  Shop     @relation(fields: [shopId], references: [id])
+  inspectorId           String?
+  inspector             Inspector? @relation(fields: [inspectorId], references: [id])
+
+  // Device details
+  brandId               String
+  brand                 Brand?   @relation(fields: [brandId], references: [id])
+  modelId               String
+  model                 Model    @relation(fields: [modelId], references: [id])
+  deviceStorageGb       Int?
+  deviceColor           String?
+
+  ptaStatus             DeviceStatus @default(UNKNOWN)
+
+  // Booking details
+  deviceType            DeviceType
+  inspectionDate        DateTime
+  locationLatitude      Decimal? @db.Decimal(10, 8)
+  locationLongitude     Decimal? @db.Decimal(11, 8)
+
+  // Status flow
+  status                BookingStatus @default(AWAITING_PAYMENT)
+
+  // Financial
+  inspectionFeePkr      Decimal  @db.Decimal(8, 2)
+  paymentId             String?
+  payment               Payment? @relation(fields: [paymentId], references: [id])
+
+  // Review window
+  reportDeliveredAt     DateTime?
+  reviewWindowExpiresAt DateTime?
+  customerConfirmedAt   DateTime?
+
+  // Dispute
+  disputeReason         String?
+  disputeRaisedAt       DateTime?
+  disputeResolvedAt     DateTime?
+  disputeResolution     String?
+
+  // Relations
+  inspectionResults     InspectionResult[]
+  inspectionEvidence    InspectionEvidence[]
+  inspectionReport      InspectionReport?
+  review                Review?
+  complaint             Complaint?
+  payoutLedger          PayoutLedger?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([customerId, status])
+  @@index([shopId, status])
+  @@index([inspectorId])
+  @@index([status])
+  @@index([reviewWindowExpiresAt])
+}
+
+model InspectionChecklist {
+  id                    String   @id @default(cuid())
+
+  deviceType            DeviceType
+  category              String
+  categorySequence      Int
+
+  checkName             String
+  checkSequence         Int
+  description           String?
+  testInstructions      String?
+
+  status                ChecklistStatus @default(ACTIVE)
+
+  inspectionResults     InspectionResult[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([deviceType, category, checkSequence])
+  @@index([deviceType, category])
+}
+
+model InspectionResult {
+  id                    String   @id @default(cuid())
+  bookingId             String
+  booking               InspectionBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  checklistId           String
+  checklist             InspectionChecklist @relation(fields: [checklistId], references: [id])
+
+  result                CheckResult
+  inspectorNotes        String?
+
+  evidenceId            String?
+  evidence              InspectionEvidence? @relation(fields: [evidenceId], references: [id])
+
+  testedAt              DateTime?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([bookingId])
+}
+
+model InspectionEvidence {
+  id                    String   @id @default(cuid())
+  bookingId             String
+  booking               InspectionBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  storageKey            String
+  storageUrl            String?
+  mimeType              String
+  fileSizeBytes         Int?
+
+  annotationType        AnnotationType?
+  annotationText        String?
+  annotationCoordinates String? // JSON coordinates
+
+  photoSequence         Int
+  takenAt               DateTime?
+
+  inspectionResults     InspectionResult[]
+
+  createdAt             DateTime @default(now())
+
+  @@index([bookingId, photoSequence])
+}
+
+model InspectionReport {
+  id                    String   @id @default(cuid())
+  bookingId             String   @unique
+  booking               InspectionBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  reportNumber          String   @unique
+  qrCodeId              String   @unique
+
+  overallAssessment     AssessmentLevel
+  assessmentSummary     String?
+
+  pdfStorageKey         String
+  pdfStorageUrl         String?
+
+  isVerified            Boolean  @default(true)
+  verificationRequestedAt DateTime?
+  verificationCompletedAt DateTime?
+
+  version               Int      @default(1)
+  supersedesReportId    String?
+  supersedesReport      InspectionReport? @relation("ReportVersion", fields: [supersedesReportId], references: [id])
+  supersededBy          InspectionReport? @relation("ReportVersion")
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([bookingId])
+  @@index([reportNumber])
+  @@index([qrCodeId])
+}
+
+// ============================================================================
+// PAYMENTS & PAYOUTS
+// ============================================================================
+
+model Payment {
+  id                    String   @id @default(cuid())
+
+  customerId            String
+  customer              User     @relation(fields: [customerId], references: [id])
+  bookingId             String   @unique
+  booking               InspectionBooking? @relation(fields: [bookingId], references: [id])
+
+  amountPkr             Decimal  @db.Decimal(8, 2)
+  gatewayFeePkr         Decimal  @db.Decimal(8, 2) @default(0)
+  netAmountPkr          Decimal  @db.Decimal(8, 2)
+
+  gateway               String // "safepay", "payfast"
+  gatewayTransactionId  String?  @unique
+  gatewayReference      String?
+
+  status                PaymentStatus @default(PENDING)
+
+  webhookReceivedAt     DateTime?
+  webhookVerified       Boolean  @default(false)
+  webhookSignatureVerified Boolean @default(false)
+
+  idempotencyKey        String   @unique
+
+  shopSubscriptions     ShopSubscription[]
+  refunds               Refund[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  processedAt           DateTime?
+
+  @@index([customerId, status])
+  @@index([bookingId])
+  @@index([gatewayTransactionId])
+  @@index([idempotencyKey])
+}
+
+model Refund {
+  id                    String   @id @default(cuid())
+  paymentId             String
+  payment               Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  bookingId             String
+  booking               InspectionBooking? @relation(fields: [bookingId], references: [id])
+
+  amountPkr             Decimal  @db.Decimal(8, 2)
+  reason                String
+
+  gatewayRefundId       String?  @unique
+
+  status                RefundStatus @default(PENDING)
+
+  requestedById          String?
+  requestedBy           User?    @relation("RefundRequested", fields: [requestedById], references: [id])
+  approvedById          String?
+  approvedBy            User?    @relation("RefundApproved", fields: [approvedById], references: [id])
+  approvedAt            DateTime?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([bookingId, status])
+}
+
+model PayoutLedger {
+  id                    String   @id @default(cuid())
+
+  shopId                String
+  shop                  Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  bookingId             String   @unique
+  booking               InspectionBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  // Amounts
+  grossInspectionFeePkr Decimal  @db.Decimal(8, 2)
+  gatewayFeePkr         Decimal  @db.Decimal(8, 2)
+  mobcheckMarginPkr     Decimal  @db.Decimal(8, 2)
+  shopPayoutPkr         Decimal  @db.Decimal(8, 2)
+
+  // Eligibility tracking
+  paymentConfirmed      Boolean  @default(false)
+  paymentConfirmedAt    DateTime?
+
+  reportDelivered       Boolean  @default(false)
+  reportDeliveredAt     DateTime?
+
+  reviewWindowExpiresAt DateTime?
+  customerConfirmed     Boolean  @default(false)
+  customerConfirmedAt   DateTime?
+
+  disputeActive         Boolean  @default(false)
+  disputeResolved       Boolean  @default(false)
+  disputeResolvedAt     DateTime?
+
+  payoutEligible        Boolean  @default(false)
+  payoutEligibleAt      DateTime?
+
+  // Payout status
+  payoutStatus          PayoutStatus @default(PENDING)
+  payoutDate            DateTime?
+  payoutReference       String?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([shopId, payoutStatus])
+  @@index([payoutEligibleAt])
+  @@index([payoutDate])
+}
+
+// ============================================================================
+// COMMUNITY & FEEDBACK
+// ============================================================================
+
+model Review {
+  id                    String   @id @default(cuid())
+
+  shopId                String
+  shop                  Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  bookingId             String   @unique
+  booking               InspectionBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  customerId            String
+  customer              User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Ratings
+  overallRating         Int // 1-5
+  inspectionQuality     Int?
+  professionalism       Int?
+  timeliness            Int?
+  communication         Int?
+  reportAccuracy        Int?
+
+  // Feedback
+  reviewText            String?
+  wouldRecommend        Boolean?
+
+  status                ReviewStatus @default(PUBLISHED)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([shopId, status])
+  @@index([customerId])
+  @@index([bookingId])
+}
+
+model Complaint {
+  id                    String   @id @default(cuid())
+
+  shopId                String
+  shop                  Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  customerId            String
+  customer              User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  bookingId             String?
+  booking               InspectionBooking? @relation(fields: [bookingId], references: [id])
+
+  category              ComplaintCategory
+  description           String
+  evidenceUrls          String[]
+
+  status                ComplaintStatus @default(SUBMITTED)
+  resolution            String?
+
+  reviewedById          String?
+  reviewedBy            User?    @relation(fields: [reviewedById], references: [id])
+  reviewedAt            DateTime?
+
+  actionTaken           ComplaintAction @default(NONE)
+  actionTakenAt         DateTime?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([shopId, status])
+  @@index([customerId, status])
+  @@index([status])
+}
+
+model ShopBan {
+  id                    String   @id @default(cuid())
+  shopId                String
+  shop                  Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  banType               BanType
+  reason                String
+
+  bannedById            String
+  bannedBy              User     @relation(fields: [bannedById], references: [id])
+  bannedAt              DateTime @default(now())
+
+  suspendedUntil        DateTime?
+
+  appealSubmitted       Boolean  @default(false)
+  appealText            String?
+  appealSubmittedAt     DateTime?
+  appealReviewedAt      DateTime?
+  appealDecision        String?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([shopId, banType])
+}
+
+// ============================================================================
+// ADMIN & LOGGING
+// ============================================================================
+
+model AdminAction {
+  id                    String   @id @default(cuid())
+
+  adminId               String
+  admin                 User     @relation(fields: [adminId], references: [id])
+  actionType            ActionType
+
+  entityType            String?
+  entityId              String?
+
+  description           String?
+  changes               String? // JSON
+
+  createdAt             DateTime @default(now())
+
+  @@index([adminId, createdAt])
+  @@index([actionType])
+}
+
+model WebhookLog {
+  id                    String   @id @default(cuid())
+
+  webhookType           WebhookType
+  gateway               String
+
+  gatewayEventId        String   @unique
+  payload               String   // JSON
+
+  signature             String?
+  signatureVerified     Boolean  @default(false)
+
+  processed             Boolean  @default(false)
+  processedAt           DateTime?
+  processingError       String?
+
+  createdAt             DateTime @default(now())
+
+  @@index([gatewayEventId])
+  @@index([webhookType, processed])
+}
+
+model ErrorLog {
+  id                    String   @id @default(cuid())
+
+  errorType             String
+  errorMessage          String
+  stackTrace            String?
+
+  userId                String?
+
+  requestId             String?
+
+  severity              LogSeverity @default(ERROR)
+
+  resolved              Boolean  @default(false)
+  resolvedAt            DateTime?
+
+  createdAt             DateTime @default(now())
+
+  @@index([severity, createdAt])
+  @@index([errorType])
+}
+
+model PlatformSetting {
+  id                    String   @id @default(cuid())
+
+  settingKey            String   @unique
+  settingValue          String
+  settingType           SettingType
+
+  description           String?
+
+  updatedById           String?
+  updatedAt             DateTime @updatedAt
+
+  createdAt             DateTime @default(now())
+
+  @@index([settingKey])
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  CUSTOMER
+  SELLER
+  SHOP_OWNER
+  INSPECTOR
+  SUPPORT
+  OPS_ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum ContactPreference {
+  EMAIL
+  WHATSAPP
+  PLATFORM
+  PHONE
+}
+
+enum EmailTokenType {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+enum ModelCategory {
+  FLAGSHIP
+  MID_RANGE
+  BUDGET
+}
+
+enum DeviceOS {
+  IOS
+  ANDROID
+}
+
+enum PhoneCondition {
+  BRAND_NEW
+  LIKE_NEW
+  EXCELLENT
+  GOOD
+  FAIR
+  FOR_PARTS
+}
+
+enum DeviceStatus {
+  APPROVED
+  NON_PTA
+  UNKNOWN
+  BLOCKED
+  NOT_VERIFIED
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+  REMOVED
+  DRAFT
+}
+
+enum InquiryStatus {
+  OPEN
+  RESPONDED
+  CLOSED
+}
+
+enum ShopStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
+  BLOCKED
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum ServiceStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum DocumentType {
+  BUSINESS_LICENSE
+  OWNER_ID
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum InspectorStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum DeviceType {
+  IPHONE
+  ANDROID
+}
+
+enum BookingStatus {
+  AWAITING_PAYMENT
+  PAYMENT_CONFIRMED
+  AWAITING_SHOP_CONFIRMATION
+  BOOKING_ACCEPTED
+  INSPECTOR_ASSIGNED
+  INSPECTION_IN_PROGRESS
+  INSPECTION_SUBMITTED
+  REPORT_UNDER_REVIEW
+  REPORT_DELIVERED
+  REVIEW_WINDOW_OPEN
+  COMPLETED
+  CANCELLED
+  REFUND_PENDING
+  REFUNDED
+  DISPUTE_RAISED
+}
+
+enum ChecklistStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum CheckResult {
+  PASS
+  FAIL
+  NEEDS_ATTENTION
+  NOT_TESTED
+  NOT_VERIFIABLE
+  NOT_APPLICABLE
+}
+
+enum AnnotationType {
+  SCREEN_CRACK
+  FRAME_DENT
+  CAMERA_DAMAGE
+  CHARGING_PORT
+  BACK_GLASS_CRACK
+  BUTTON_ISSUE
+  DISPLAY_LINE
+  OTHER
+}
+
+enum AssessmentLevel {
+  EXCELLENT
+  GOOD
+  FAIR
+  NEEDS_ATTENTION
+  CRITICAL_ISSUES
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum RefundStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
+enum PayoutStatus {
+  PENDING
+  SCHEDULED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ReviewStatus {
+  PUBLISHED
+  FLAGGED
+  REMOVED
+}
+
+enum ComplaintCategory {
+  FRAUDULENT
+  MISLEADING_INFO
+  POOR_QUALITY
+  INCORRECT_REPORT
+  PAYMENT_ISSUE
+  FAKE_REVIEWS
+  HARASSMENT
+  CANCELLATION
+  OTHER
+}
+
+enum ComplaintStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+enum ComplaintAction {
+  WARNING
+  TEMPORARY_SUSPENSION
+  PERMANENT_BAN
+  NONE
+}
+
+enum BanType {
+  TEMPORARY_SUSPENSION
+  PERMANENT_BAN
+}
+
+enum ActionType {
+  SHOP_VERIFY
+  SHOP_SUSPEND
+  SHOP_BAN
+  PAYMENT_REFUND
+  DISPUTE_RESOLVE
+  CONFIG_UPDATE
+  USER_SUSPEND
+  OTHER
+}
+
+enum WebhookType {
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  REFUND_SUCCESS
+  OTHER
+}
+
+enum LogSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+enum SettingType {
+  STRING
+  INTEGER
+  BOOLEAN
+  JSON
+}
