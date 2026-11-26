@@ -1,15 +1,20 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import '@fontsource-variable/inter';
 import '../styles/globals.css';
+import { AuthProvider } from '@/context/AuthContext';
+import { ToastProvider } from '@/components/ui/Toast';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <>
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>MobCheck - Check Before You Buy</title>
-      </Head>
-      <Component {...pageProps} />
-    </>
+    <AuthProvider initialUser={pageProps.user}>
+      <ToastProvider>
+        <Head>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>MobCheck · Check before you buy</title>
+        </Head>
+        <Component {...pageProps} />
+      </ToastProvider>
+    </AuthProvider>
   );
 }
