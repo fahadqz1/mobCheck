@@ -1,0 +1,36 @@
+{
+  "name": "mobcheck",
+  "version": "0.1.0",
+  "description": "MobCheck - Mobile Phone Marketplace & Professional Inspection Platform",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "test:security": "turbo run test:security",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "db:migrate": "cd packages/database && prisma migrate deploy",
+    "db:seed": "cd packages/database && prisma db seed",
+    "db:studio": "cd packages/database && prisma studio",
+    "clean": "turbo clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "turbo": "^1.10.16",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
