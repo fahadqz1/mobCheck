@@ -1,7 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(cd \"$env:USERPROFILE\\\\Desktop\\\\MobCheck\"; git log --oneline; git status)"
+      "PowerShell(cd \"$env:USERPROFILE\\\\Desktop\\\\MobCheck\"; git log --oneline; git status)",
+      "PowerShell(cd \"$env:USERPROFILE\\\\Desktop\\\\MobCheck\"; git log --oneline -5)",
+      "PowerShell(cd \"$env:USERPROFILE\\\\Desktop\\\\MobCheck\"; git log --oneline -6; Write-Host \"`n📊 FINAL PROJECT STATISTICS:\" -ForegroundColor Green; $files = git ls-files; Write-Host \"Total tracked files: $\\($files.Count\\)\"; $size = \\(Get-ChildItem -Recurse -Exclude node_modules,.git,dist,build,.next | Measure-Object -Property Length -Sum\\).Sum / 1MB; Write-Host \"Project size: $\\([math]::Round\\($size, 2\\)\\) MB\")",
+      "PowerShell(cd \"$env:USERPROFILE\\\\Desktop\\\\MobCheck\"; git remote add origin https://github.com/fahadqz1/mobCheck.git; git remote -v)",
+      "PowerShell(cd \"$env:USERPROFILE\\\\Desktop\\\\MobCheck\"; git branch -M main; git push -u origin main 2>&1)",
+      "PowerShell(gh repo create mobCheck --public --source=. --remote=origin --push 2>&1)",
+      "PowerShell(head -20)",
+      "PowerShell(cd \"$env:USERPROFILE\\\\Desktop\\\\MobCheck\"; git branch -M main; git push -u origin main)",
+      "PowerShell(cd \"$env:USERPROFILE\\\\Desktop\"; $timestamp = Get-Date -Format 'yyyy-MM-dd-HHmmss'; $zipPath = \"mobCheck-backup-$timestamp.zip\"; Compress-Archive -Path \"MobCheck\" -DestinationPath $zipPath -Force; $size = \\(Get-Item $zipPath\\).Length / 1MB; Write-Host \"✅ Backup created: $zipPath\" -ForegroundColor Green; Write-Host \"Size: $\\([math]::Round\\($size, 2\\)\\) MB\" -ForegroundColor Green; Write-Host \"Path: $env:USERPROFILE\\\\Desktop\\\\$zipPath\" -ForegroundColor Yellow)",
+      "PowerShell(cd \"$env:USERPROFILE\\\\Desktop\\\\MobCheck\"; Write-Host \"✅ GITHUB PUSH VERIFICATION:\" -ForegroundColor Green; git log --oneline -6; Write-Host \"`n📊 GITHUB REPOSITORY STATUS:\" -ForegroundColor Cyan; git remote -v)",
+      "PowerShell(cd \"$env:USERPROFILE\\\\Desktop\\\\MobCheck\"; git push origin main; Write-Host \"`n✅ FINAL PUSH COMPLETE!\" -ForegroundColor Green)"
     ]
   }
 }
