@@ -49,6 +49,7 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
+.pgdata/
 
 # Package manager lock files (optional - for reproducibility)
 package-lock.json
@@ -65,3 +66,4 @@ credentials/
 # Deployment
 .vercel/
 .netlify/
+.claude/

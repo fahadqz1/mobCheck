@@ -10,13 +10,15 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
-    "db:validate": "prisma validate"
+    "db:validate": "prisma validate",
+    "db:local": "node scripts/local-db.mjs"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "embedded-postgres": "^19.0.0-beta.20",
     "prisma": "^5.7.1",
     "tsx": "^4.7.0"
   }

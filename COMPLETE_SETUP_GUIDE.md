@@ -87,63 +87,46 @@ MobCheck/
 
 ## 🚀 QUICK START (3 Steps)
 
-### Step 1: Install Dependencies
+No PostgreSQL install is needed: the project runs its own PostgreSQL server from `packages/database/.pgdata`.
 
-```bash
-# Navigate to project
-cd MobCheck
+### Step 1 (first time only): install and set up
 
-# Install root dependencies
-npm install
-
-# Install database dependencies
-cd packages/database
-npm install
-cd ../../
-
-# Install web app dependencies
-cd apps/web
-npm install
-cd ../../
+```powershell
+cd C:\Users\fahad\Desktop\MobCheck
+npm install --legacy-peer-deps
+node node_modules/@embedded-postgres/windows-x64/scripts/hydrate-symlinks.js
 ```
 
-### Step 2: Setup Database
-
-```bash
-# Navigate to database package
-cd packages/database
-
-# Set environment variable (Windows PowerShell)
-$env:DATABASE_URL = "postgresql://postgres:password@localhost:5432/mobcheck_dev"
-
-# Or (Windows Command Prompt)
-set DATABASE_URL=postgresql://postgres:password@localhost:5432/mobcheck_dev
-
-# Create database migrations
-npm run db:migrate
-
-# Seed development data
-npm run db:seed
-
-# Verify database is working
-npm run db:validate
+Create `packages/database/.env`:
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/mobcheck_dev
+```
+Create `apps/web/.env.local`:
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/mobcheck_dev
+JWT_SECRET=local-dev-secret-change-me-at-least-32-chars
 ```
 
-### Step 3: Start Development Server
-
-```bash
-# Navigate to web app
-cd apps/web
-
-# Start Next.js dev server
-npm run dev
-
-# Server will start at http://localhost:3000
-# Terminal will show:
-#   ▲ Next.js 14.0.4
-#   - Local:        http://localhost:3000
-#   - Environments: .env.local
+Then start the database (Terminal 1, leave it open) and create tables + demo data (Terminal 2):
+```powershell
+npm run db:start      # Terminal 1
+npm run db:setup      # Terminal 2, first time only
 ```
+
+### Step 2 (every time): start the website
+
+```powershell
+npm run db:start      # Terminal 1 - database
+npm run web           # Terminal 2 - website at http://localhost:3000
+```
+
+### Demo accounts (password for all: `Password123`)
+
+| Email | Role |
+|-------|------|
+| admin@mobcheck.pk | Super Admin (dashboard shows platform stats) |
+| shop@mobcheck.pk | Shop Owner (owns the 5 demo shops) |
+| customer@mobcheck.pk | Customer (posted the 6 demo listings) |
 
 ---
 
@@ -159,49 +142,7 @@ npm run dev
 
 ---
 
-## 🗄️ DATABASE SETUP
-
-### Prerequisites
-
-You need **PostgreSQL** installed locally:
-
-**Windows Installation:**
-1. Download PostgreSQL from https://www.postgresql.org/download/windows/
-2. Run installer
-3. During setup:
-   - Username: `postgres`
-   - Password: (choose something safe, e.g., `password`)
-   - Port: 5432 (default)
-4. Complete installation
-
-**Verify PostgreSQL is running:**
-```bash
-# On Windows
-psql -U postgres -c "SELECT version();"
-```
-
-### Environment Setup
-
-Create `.env.local` in `apps/web/`:
-
-```env
-# Application
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=MobCheck
-NODE_ENV=development
-
-# Database (Match your PostgreSQL setup)
-DATABASE_URL=postgresql://postgres:password@localhost:5432/mobcheck_dev
-
-# Authentication
-JWT_SECRET=your-secret-key-here-min-32-characters-long
-SESSION_SECRET=your-session-secret-key-min-32-chars
-
-# Optional - Add later for production
-PAYMENT_API_KEY=placeholder
-EMAIL_API_KEY=placeholder
-STORAGE_BUCKET=placeholder
-```
+6. **Dashboard:**  http://localhost:3000/dashboard (after login)
 
 ---
 

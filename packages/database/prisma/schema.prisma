@@ -43,10 +43,13 @@ model User {
   listings              PhoneListing[]
   listingInquiries      ListingInquiry[]
   inspectionBookings    InspectionBooking[] @relation("BookingCustomer")
-  inspectionBookingsShop InspectionBooking[] @relation("BookingShop")
+  ownedShops            Shop[]
+  refundsRequested      Refund[] @relation("RefundRequested")
+  refundsApproved       Refund[] @relation("RefundApproved")
   payments              Payment[]
   reviews               Review[]
-  complaints            Complaint[]
+  complaints            Complaint[] @relation("ComplaintCustomer")
+  reviewedComplaints    Complaint[] @relation("ComplaintReviewer")
   adminActions          AdminAction[]
   bannedShops           ShopBan[]
   verifiedShops         Shop[] @relation("VerifiedBy")
@@ -155,6 +158,7 @@ model Brand {
 
   models                Model[]
   listings              PhoneListing[]
+  inspectionBookings    InspectionBooking[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -478,7 +482,7 @@ model InspectionBooking {
 
   // Device details
   brandId               String
-  brand                 Brand?   @relation(fields: [brandId], references: [id])
+  brand                 Brand    @relation(fields: [brandId], references: [id])
   modelId               String
   model                 Model    @relation(fields: [modelId], references: [id])
   deviceStorageGb       Int?
@@ -498,7 +502,7 @@ model InspectionBooking {
   // Financial
   inspectionFeePkr      Decimal  @db.Decimal(8, 2)
   paymentId             String?
-  payment               Payment? @relation(fields: [paymentId], references: [id])
+  payment               Payment?
 
   // Review window
   reportDeliveredAt     DateTime?
@@ -516,7 +520,8 @@ model InspectionBooking {
   inspectionEvidence    InspectionEvidence[]
   inspectionReport      InspectionReport?
   review                Review?
-  complaint             Complaint?
+  complaints            Complaint[]
+  refunds               Refund[]
   payoutLedger          PayoutLedger?
 
   createdAt             DateTime @default(now())
@@ -616,7 +621,7 @@ model InspectionReport {
   verificationCompletedAt DateTime?
 
   version               Int      @default(1)
-  supersedesReportId    String?
+  supersedesReportId    String?  @unique
   supersedesReport      InspectionReport? @relation("ReportVersion", fields: [supersedesReportId], references: [id])
   supersededBy          InspectionReport? @relation("ReportVersion")
 
@@ -638,7 +643,7 @@ model Payment {
   customerId            String
   customer              User     @relation(fields: [customerId], references: [id])
   bookingId             String   @unique
-  booking               InspectionBooking? @relation(fields: [bookingId], references: [id])
+  booking               InspectionBooking @relation(fields: [bookingId], references: [id])
 
   amountPkr             Decimal  @db.Decimal(8, 2)
   gatewayFeePkr         Decimal  @db.Decimal(8, 2) @default(0)
@@ -674,7 +679,7 @@ model Refund {
   paymentId             String
   payment               Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   bookingId             String
-  booking               InspectionBooking? @relation(fields: [bookingId], references: [id])
+  booking               InspectionBooking @relation(fields: [bookingId], references: [id])
 
   amountPkr             Decimal  @db.Decimal(8, 2)
   reason                String
@@ -783,7 +788,7 @@ model Complaint {
   shopId                String
   shop                  Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
   customerId            String
-  customer              User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer              User     @relation("ComplaintCustomer", fields: [customerId], references: [id], onDelete: Cascade)
   bookingId             String?
   booking               InspectionBooking? @relation(fields: [bookingId], references: [id])
 
@@ -795,7 +800,7 @@ model Complaint {
   resolution            String?
 
   reviewedById          String?
-  reviewedBy            User?    @relation(fields: [reviewedById], references: [id])
+  reviewedBy            User?    @relation("ComplaintReviewer", fields: [reviewedById], references: [id])
   reviewedAt            DateTime?
 
   actionTaken           ComplaintAction @default(NONE)

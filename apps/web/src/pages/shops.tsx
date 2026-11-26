@@ -107,7 +107,7 @@ export default function Shops() {
                   <div className="border-b pb-4 mb-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Rating</span>
-                      <span className="text-lg">{renderStars(shop.averageRating)} {shop.averageRating?.toFixed(1) || 'N/A'}</span>
+                      <span className="text-lg">{renderStars(Number(shop.averageRating))} {shop.averageRating ? Number(shop.averageRating).toFixed(1) : 'N/A'}</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">{shop.totalReviews} reviews</p>
                   </div>

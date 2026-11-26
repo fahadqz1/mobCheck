@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -226,6 +227,89 @@ async function main() {
   }
 
   console.log('Seeded inspection checklists');
+
+  const passwordHash = await bcrypt.hash('Password123', 10);
+  const demoUser = (email: string, firstName: string, lastName: string, role: any) =>
+    prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: { email, passwordHash, firstName, lastName, role, status: 'ACTIVE', emailVerified: true },
+    });
+
+  const admin = await demoUser('admin@mobcheck.pk', 'Admin', 'MobCheck', 'SUPER_ADMIN');
+  const owner = await demoUser('shop@mobcheck.pk', 'Ali', 'Raza', 'SHOP_OWNER');
+  const seller = await demoUser('customer@mobcheck.pk', 'Sara', 'Khan', 'CUSTOMER');
+  await prisma.shopOwnerProfile.upsert({ where: { userId: owner.id }, update: {}, create: { userId: owner.id } });
+  await prisma.customerProfile.upsert({
+    where: { userId: seller.id },
+    update: {},
+    create: { userId: seller.id, displayName: 'Sara Khan', city: 'Lahore' },
+  });
+
+  const shops = [
+    { name: 'Hafeez Mobile Hub', slug: 'hafeez-mobile-hub', city: 'Lahore', area: 'Hafeez Centre', rating: 4.8, reviews: 126 },
+    { name: 'Liberty Phone Clinic', slug: 'liberty-phone-clinic', city: 'Lahore', area: 'Liberty Market', rating: 4.6, reviews: 84 },
+    { name: 'DHA Smart Devices', slug: 'dha-smart-devices', city: 'Lahore', area: 'DHA Phase 5', rating: 4.4, reviews: 47 },
+    { name: 'Saddar Mobile Point', slug: 'saddar-mobile-point', city: 'Karachi', area: 'Saddar', rating: 4.5, reviews: 63 },
+    { name: 'Blue Area Phone Lab', slug: 'blue-area-phone-lab', city: 'Islamabad', area: 'Blue Area', rating: 4.7, reviews: 91 },
+  ];
+  for (const s of shops) {
+    await prisma.shop.upsert({
+      where: { slug: s.slug },
+      update: {},
+      create: {
+        ownerId: owner.id,
+        name: s.name,
+        slug: s.slug,
+        city: s.city,
+        area: s.area,
+        addressLine1: `Shop 12, ${s.area}`,
+        phone: '+92 300 1234567',
+        email: `${s.slug}@example.com`,
+        openingHour: '11:00',
+        closingHour: '21:00',
+        status: 'VERIFIED',
+        verifiedAt: new Date(),
+        verifiedById: admin.id,
+        averageRating: s.rating,
+        totalReviews: s.reviews,
+      },
+    });
+  }
+  console.log(`Seeded ${shops.length} shops`);
+
+  if ((await prisma.phoneListing.count()) === 0) {
+    const listings = [
+      { m: 0, title: 'iPhone 15 Pro 256GB Natural', price: 365000, condition: 'LIKE_NEW', pta: 'APPROVED', city: 'Lahore', area: 'Gulberg', storage: 256 },
+      { m: 0, title: 'iPhone 15 Pro 128GB Black', price: 310000, condition: 'EXCELLENT', pta: 'NON_PTA', city: 'Lahore', area: 'Johar Town', storage: 128 },
+      { m: 1, title: 'Galaxy S24 Ultra 512GB', price: 395000, condition: 'BRAND_NEW', pta: 'APPROVED', city: 'Lahore', area: 'DHA', storage: 512 },
+      { m: 1, title: 'Galaxy S24 Ultra 256GB Gray', price: 335000, condition: 'GOOD', pta: 'APPROVED', city: 'Karachi', area: 'Clifton', storage: 256 },
+      { m: 2, title: 'Pixel 8 Pro 128GB Obsidian', price: 175000, condition: 'EXCELLENT', pta: 'NON_PTA', city: 'Lahore', area: 'Model Town', storage: 128 },
+      { m: 2, title: 'Pixel 8 Pro 256GB Bay', price: 198000, condition: 'LIKE_NEW', pta: 'APPROVED', city: 'Islamabad', area: 'F-7', storage: 256 },
+    ];
+    for (const l of listings) {
+      const model = models[l.m];
+      await prisma.phoneListing.create({
+        data: {
+          userId: seller.id,
+          brandId: model.brandId,
+          modelId: model.id,
+          storageGb: l.storage,
+          condition: l.condition as any,
+          pricePkr: l.price,
+          ptaStatus: l.pta as any,
+          hasBox: true,
+          hasCharger: true,
+          title: l.title,
+          description: 'Well kept, no repairs. Inspection welcome.',
+          locationCity: l.city,
+          locationArea: l.area,
+          sellerContactPreference: 'PLATFORM',
+        },
+      });
+    }
+    console.log(`Seeded ${listings.length} listings`);
+  }
 
   console.log('✅ Database seeding completed successfully!');
 }

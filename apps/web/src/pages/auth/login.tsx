@@ -31,12 +31,7 @@ export default function Login() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Redirect based on role
-      const role = data.user.role;
-      if (role === 'SHOP_OWNER') router.push('/vendor/dashboard');
-      else if (role === 'INSPECTOR') router.push('/inspector/dashboard');
-      else if (['SUPER_ADMIN', 'OPS_ADMIN'].includes(role)) router.push('/admin/dashboard');
-      else router.push('/dashboard');
+      router.push('/dashboard');
     } catch (err) {
       setError('An error occurred. Please try again.');
     } finally {

@@ -117,7 +117,7 @@ export default function Marketplace() {
                     </span>
                   </div>
                   <div className="border-t pt-3 flex justify-between items-center">
-                    <span className="text-xl font-bold text-indigo-600">Rs. {listing.pricePkr.toLocaleString()}</span>
+                    <span className="text-xl font-bold text-indigo-600">Rs. {Number(listing.pricePkr).toLocaleString()}</span>
                     <button className="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700">
                       View
                     </button>
