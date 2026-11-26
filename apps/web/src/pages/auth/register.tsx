@@ -1,151 +1,105 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
+import type { GetServerSideProps } from 'next';
+import { ShoppingBag, Store } from 'lucide-react';
+import { AuthShell, safeNext } from '@/components/auth/AuthShell';
+import { Field, Input } from '@/components/ui/Form';
+import { Button } from '@/components/ui/Button';
+import { Alert } from '@/components/ui/Feedback';
+import { api, ApiError } from '@/lib/client';
+import { cn } from '@/lib/cn';
+import { ClientUser, notifyOtherTabs, useAuth } from '@/context/AuthContext';
+import { getSsrUser } from '@/lib/ssr-auth';
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const user = await getSsrUser(ctx);
+  if (user) return { redirect: { destination: '/dashboard', permanent: false } };
+  return { props: {} };
+};
+
+const roles = [
+  { value: 'CUSTOMER', label: 'Buy or sell a phone', icon: ShoppingBag },
+  { value: 'SHOP_OWNER', label: 'Register my shop', icon: Store },
+] as const;
 
 export default function Register() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+  const { setUser } = useAuth();
+  const [form, setForm] = useState({
     firstName: '',
     lastName: '',
-    role: 'CUSTOMER',
+    email: '',
+    phone: '',
+    password: '',
+    role: router.query.role === 'SHOP_OWNER' ? 'SHOP_OWNER' : 'CUSTOMER',
   });
   const [error, setError] = useState('');
+  const [fields, setFields] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
+    setFields({});
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Registration failed');
-        return;
-      }
-
-      // Store token
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      // Redirect to dashboard
-      router.push('/dashboard');
+      const { user } = await api<{ user: ClientUser }>('/api/auth/register', { body: form });
+      setUser(user);
+      notifyOtherTabs();
+      router.replace(user.role === 'SHOP_OWNER' ? '/vendor/shop' : safeNext(router.query.next));
     } catch (err) {
-      setError('An error occurred. Please try again.');
-    } finally {
+      const e = err as ApiError;
+      setError(e.message);
+      setFields(e.fields || {});
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-100 flex items-center justify-center px-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center text-indigo-600 mb-8">Join MobCheck</h1>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">First Name</label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-indigo-600"
-                placeholder="John"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Last Name</label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-indigo-600"
-                placeholder="Doe"
-                required
-              />
-            </div>
+    <AuthShell title="Create your account" subtitle={<>Already have an account? <Link href="/auth/login" className="link">Log in</Link></>}>
+      {error && <Alert tone="danger" title={error} className="mb-5" />}
+      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+        <fieldset>
+          <legend className="text-label mb-2">I want to</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {roles.map((r) => (
+              <label
+                key={r.value}
+                className={cn(
+                  'flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors',
+                  form.role === r.value ? 'border-brand-600 bg-brand-50 text-brand-800 ring-1 ring-brand-600' : 'border-slate-300 text-slate-700 hover:border-slate-400'
+                )}
+              >
+                <input type="radio" name="role" value={r.value} checked={form.role === r.value} onChange={() => setForm((f) => ({ ...f, role: r.value }))} className="sr-only" />
+                <r.icon className="h-4 w-4 shrink-0" aria-hidden />
+                {r.label}
+              </label>
+            ))}
           </div>
-
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-indigo-600"
-              placeholder="your@email.com"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-indigo-600"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">I am a...</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-indigo-600"
-            >
-              <option value="CUSTOMER">Customer / Buyer</option>
-              <option value="SHOP_OWNER">Shop Owner</option>
-            </select>
-          </div>
-
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 text-white font-semibold py-3 rounded hover:bg-indigo-700 disabled:bg-gray-400"
-          >
-            {loading ? 'Creating account...' : 'Create Account'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            Already have an account?{' '}
-            <a href="/auth/login" className="text-indigo-600 font-semibold hover:underline">
-              Login here
-            </a>
-          </p>
+        </fieldset>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="First name" error={fields.firstName} required>
+            {(p) => <Input {...p} autoComplete="given-name" value={form.firstName} onChange={set('firstName')} />}
+          </Field>
+          <Field label="Last name" error={fields.lastName} required>
+            {(p) => <Input {...p} autoComplete="family-name" value={form.lastName} onChange={set('lastName')} />}
+          </Field>
         </div>
-      </div>
-    </div>
+        <Field label="Email address" error={fields.email} required>
+          {(p) => <Input {...p} type="email" autoComplete="email" value={form.email} onChange={set('email')} />}
+        </Field>
+        <Field label="Mobile number" error={fields.phone} hint="Optional. Buyers can reach you on WhatsApp.">
+          {(p) => <Input {...p} type="tel" autoComplete="tel" placeholder="0300 1234567" value={form.phone} onChange={set('phone')} />}
+        </Field>
+        <Field label="Password" error={fields.password} hint="At least 8 characters, with a letter and a number." required>
+          {(p) => <Input {...p} type="password" autoComplete="new-password" value={form.password} onChange={set('password')} />}
+        </Field>
+        <Button type="submit" size="lg" className="w-full" loading={loading}>Create account</Button>
+        <p className="text-center text-xs text-slate-500">By creating an account you agree to MobCheck&apos;s terms of use.</p>
+      </form>
+    </AuthShell>
   );
 }

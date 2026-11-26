@@ -1,19 +1,47 @@
 import { z } from 'zod';
 
-// User Validation
+const email = z.string().trim().toLowerCase().email('Enter a valid email address');
+export const passwordRule = z
+  .string()
+  .min(8, 'Password must be at least 8 characters')
+  .max(128, 'Password is too long')
+  .regex(/[A-Za-z]/, 'Password must contain a letter')
+  .regex(/[0-9]/, 'Password must contain a number');
+export const pkPhone = z
+  .string()
+  .trim()
+  .regex(/^(\+92|0)3\d{2}[\s-]?\d{7}$/, 'Enter a Pakistani mobile number, e.g. 0300 1234567');
+
+// Inspector accounts are created by shop owners, never self-registered.
 export const RegisterSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  firstName: z.string().min(2, 'First name required'),
-  lastName: z.string().min(2, 'Last name required'),
-  phone: z.string().optional(),
-  role: z.enum(['CUSTOMER', 'SHOP_OWNER', 'INSPECTOR']),
+  email,
+  password: passwordRule,
+  firstName: z.string().trim().min(2, 'First name is required').max(50),
+  lastName: z.string().trim().min(2, 'Last name is required').max(50),
+  phone: pkPhone.optional().or(z.literal('').transform(() => undefined)),
+  role: z.enum(['CUSTOMER', 'SHOP_OWNER']).default('CUSTOMER'),
 });
 
 export const LoginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  email,
+  password: z.string().min(1, 'Password is required'),
 });
+
+export const ProfileSchema = z.object({
+  firstName: z.string().trim().min(2, 'First name is required').max(50),
+  lastName: z.string().trim().min(2, 'Last name is required').max(50),
+  phone: pkPhone.optional().or(z.literal('').transform(() => null)),
+  city: z.string().trim().max(50).optional(),
+  area: z.string().trim().max(80).optional(),
+});
+
+export const ChangePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: passwordRule,
+});
+
+export const ForgotPasswordSchema = z.object({ email });
+export const ResetPasswordSchema = z.object({ token: z.string().min(20), password: passwordRule });
 
 // Shop Validation
 export const ShopRegistrationSchema = z.object({
