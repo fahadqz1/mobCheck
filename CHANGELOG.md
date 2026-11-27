@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased] — branch `feature/liquid-glass-theme` (28 Nov 2026)
+
+### Changed
+- New visual theme: ink and lime palette with pastel category tiles, Bricolage Grotesque display type, pill buttons and chips, larger radii, warm off-white background.
+- "Liquid glass" surfaces (frosted, blurred panels with a highlight edge and a pointer-following sheen) on the header, hero report card, promise cards and image badges, with solid fallbacks for reduced transparency.
+- Header: announcement strip, sticky glass bar with pill search, category chip row (brands, PTA approved, shops, sell, verify), richer mobile sheet.
+- Home page rebuilt: lime hero with search, sample-report glass card, brand carousel with live listing counts, promo panels, "Fresh on MobCheck" with sliding liquid tabs that filter live data, promise strip, how-it-works, shop and review carousels, shop CTA.
+- Listing and shop cards: inset photo tiles, "Inspection available" glass badge, display-font prices, hover lift; shops without a cover get a pastel tile.
+- Marketplace quick brand chips; dashboard navigation as ink pills.
+
+### Fixed
+- Secondary text raised from slate-500 to slate-600 for WCAG AA contrast on the new background; step numbers darkened.
+- Missing favicon (404) replaced with an SVG icon.
+
 ## [Unreleased] — branch `feature/ux-overhaul-auth-fixes` (27 Nov 2026)
 
 ### Fixed

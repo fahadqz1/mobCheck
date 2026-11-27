@@ -198,7 +198,7 @@ export default function ManageListing({ user, brands, listing }: Props) {
                 <li key={i.id} className="px-5 py-4">
                   <div className="flex items-baseline justify-between gap-2">
                     <p className="text-sm font-medium">{fullName(i.customer)}</p>
-                    <p className="text-xs text-slate-500">{formatDate(i.createdAt, true)}</p>
+                    <p className="text-xs text-slate-600">{formatDate(i.createdAt, true)}</p>
                   </div>
                   <p className="mt-1 whitespace-pre-line text-sm text-slate-700">{i.message}</p>
                   <div className="mt-2 flex flex-wrap gap-3 text-sm">

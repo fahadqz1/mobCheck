@@ -29,7 +29,7 @@ export function Gallery({ images, emptyLabel = 'No photos uploaded yet' }: { ima
 
   if (count === 0) {
     return (
-      <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-100 text-slate-600" data-testid="gallery-empty">
+      <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-3xl border border-slate-200 bg-[#f1f2ee] text-slate-600" data-testid="gallery-empty">
         <ImageOff className="h-8 w-8 text-slate-400" aria-hidden />
         <p className="text-sm">{emptyLabel}</p>
       </div>
@@ -39,12 +39,12 @@ export function Gallery({ images, emptyLabel = 'No photos uploaded yet' }: { ima
   const current = images[index];
   return (
     <div data-testid="gallery">
-      <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+      <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-3xl border border-slate-200 bg-[#f1f2ee]">
         <Image src={current.url} alt={current.alt} fill sizes="(min-width: 1024px) 640px, 100vw" className="object-contain" priority={index === 0} />
         <button
           type="button"
           onClick={() => setFullscreen(true)}
-          className="absolute right-3 top-3 inline-flex h-9 items-center gap-1.5 rounded-lg bg-white/90 px-3 text-sm font-medium text-ink shadow-card hover:bg-white"
+          className="absolute right-3 top-3 inline-flex h-9 items-center gap-1.5 glass rounded-full px-3 text-sm font-semibold text-ink hover:bg-white"
           aria-label="View photos full screen"
         >
           <Expand className="h-4 w-4" aria-hidden />
@@ -69,7 +69,7 @@ export function Gallery({ images, emptyLabel = 'No photos uploaded yet' }: { ima
                 onClick={() => setIndex(i)}
                 aria-label={`Show photo ${i + 1}`}
                 aria-current={i === index}
-                className={cn('relative block aspect-square w-16 overflow-hidden rounded-lg border-2 bg-slate-100 sm:w-20', i === index ? 'border-brand-600' : 'border-transparent opacity-70 hover:opacity-100')}
+                className={cn('relative block aspect-square w-16 overflow-hidden rounded-2xl border-2 bg-slate-100 sm:w-20', i === index ? 'border-ink' : 'border-transparent opacity-70 hover:opacity-100')}
               >
                 <Image src={img.url} alt="" fill sizes="80px" className="object-cover" loading="lazy" />
               </button>

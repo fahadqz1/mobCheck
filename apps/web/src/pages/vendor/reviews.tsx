@@ -47,9 +47,9 @@ export default function VendorReviews({ hasShop, reviews, stats }: any) {
                   <li key={r.id} className="px-5 py-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2"><Stars value={r.overallRating} /><span className="text-sm font-medium">{r.customer.firstName} {r.customer.lastName?.[0]}.</span></div>
-                      <span className="text-xs text-slate-500">{formatDate(r.createdAt)}</span>
+                      <span className="text-xs text-slate-600">{formatDate(r.createdAt)}</span>
                     </div>
-                    <p className="mt-1 text-xs text-slate-500">{r.booking.brand.name} {r.booking.model.name}{r.wouldRecommend ? ' · Recommends your shop' : ''}</p>
+                    <p className="mt-1 text-xs text-slate-600">{r.booking.brand.name} {r.booking.model.name}{r.wouldRecommend ? ' · Recommends your shop' : ''}</p>
                     {r.reviewText && <p className="mt-2 text-sm text-slate-700">{r.reviewText}</p>}
                   </li>
                 ))}

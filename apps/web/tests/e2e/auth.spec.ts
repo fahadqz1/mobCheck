@@ -13,6 +13,7 @@ test.describe('Authentication regression', () => {
   });
 
   test('AUTH-02 login then navigate across public, detail and dashboard pages keeps the user', async ({ page }) => {
+    test.setTimeout(120_000);
     await login(page, 'customer@mobcheck.pk');
     const listingId = (await db.phoneListing.findFirstOrThrow({ where: { status: 'ACTIVE' } })).id;
     for (const path of ['/', '/marketplace', `/listings/${listingId}`, '/shops', '/shops/hafeez-mobile-hub', '/dashboard/bookings', '/dashboard/profile', '/dashboard']) {

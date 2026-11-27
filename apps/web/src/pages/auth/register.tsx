@@ -98,7 +98,7 @@ export default function Register() {
           {(p) => <Input {...p} type="password" autoComplete="new-password" value={form.password} onChange={set('password')} />}
         </Field>
         <Button type="submit" size="lg" className="w-full" loading={loading}>Create account</Button>
-        <p className="text-center text-xs text-slate-500">By creating an account you agree to MobCheck&apos;s terms of use.</p>
+        <p className="text-center text-xs text-slate-600">By creating an account you agree to MobCheck&apos;s terms of use.</p>
       </form>
     </AuthShell>
   );

@@ -83,7 +83,7 @@ export function BookingDetail({ booking }: { booking: BookingView }) {
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm text-slate-500">Booking {bookingRef(booking.id)} · created {formatDate(booking.createdAt)}</p>
+            <p className="text-sm text-slate-600">Booking {bookingRef(booking.id)} · created {formatDate(booking.createdAt)}</p>
             <h2 className="mt-1 text-xl font-semibold">{booking.device.brand} {booking.device.model}</h2>
           </div>
           <Badge tone={status.tone} className="text-sm">{status.label}</Badge>
@@ -160,7 +160,7 @@ export function BookingDetail({ booking }: { booking: BookingView }) {
                         <li key={r.id} className="flex items-start justify-between gap-4 text-sm">
                           <div>
                             <p>{r.checkName}</p>
-                            {r.notes && <p className="text-slate-500">{r.notes}</p>}
+                            {r.notes && <p className="text-slate-600">{r.notes}</p>}
                           </div>
                           <Badge tone={CHECK_RESULT[r.result].tone}>{CHECK_RESULT[r.result].label}</Badge>
                         </li>
@@ -187,7 +187,7 @@ export function BookingDetail({ booking }: { booking: BookingView }) {
               <CardBody>
                 <Stars value={booking.review.overallRating} size="md" />
                 {booking.review.reviewText && <p className="mt-2 text-sm text-slate-700">{booking.review.reviewText}</p>}
-                <p className="mt-2 text-xs text-slate-500">{formatDate(booking.review.createdAt)}</p>
+                <p className="mt-2 text-xs text-slate-600">{formatDate(booking.review.createdAt)}</p>
               </CardBody>
             </Card>
           )}
@@ -217,7 +217,7 @@ export function BookingDetail({ booking }: { booking: BookingView }) {
 
           {booking.party === 'customer' && !['AWAITING_PAYMENT', 'CANCELLED'].includes(booking.status) && (
             <>
-              <button type="button" onClick={() => setComplaintOpen(true)} className="flex w-full items-center justify-center gap-1.5 py-1 text-sm text-slate-500 hover:text-red-700">
+              <button type="button" onClick={() => setComplaintOpen(true)} className="flex w-full items-center justify-center gap-1.5 py-1 text-sm text-slate-600 hover:text-red-700">
                 <Flag className="h-4 w-4" aria-hidden />Report a problem with this shop
               </button>
               <ComplaintModal open={complaintOpen} onClose={() => setComplaintOpen(false)} shopId={booking.shop.id} shopName={booking.shop.name} bookingId={booking.id} />
@@ -234,7 +234,7 @@ function Info({ icon: Icon, label, value }: { icon: any; label: string; value: R
     <div className="flex gap-3">
       <Icon className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-600">{label}</p>
         <div className="mt-0.5 text-slate-800">{value}</div>
       </div>
     </div>
@@ -244,7 +244,7 @@ function Info({ icon: Icon, label, value }: { icon: any; label: string; value: R
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex justify-between gap-3">
-      <dt className="text-slate-500">{label}</dt>
+      <dt className="text-slate-600">{label}</dt>
       <dd className="text-right font-medium capitalize text-ink">{value}</dd>
     </div>
   );

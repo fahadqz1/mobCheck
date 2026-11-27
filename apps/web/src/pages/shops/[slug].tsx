@@ -168,7 +168,7 @@ export default function ShopProfile({ shop, reviews, breakdown, fee, isOwner }: 
             ) : (
               <>
                 {shop.whatsapp && (
-                  <a href={whatsappLink(shop.whatsapp, `Hi ${shop.name}, I found you on MobCheck and want to book an inspection.`)} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#1f8f4e] px-4 text-sm font-medium text-white hover:bg-[#187a42]">
+                  <a href={whatsappLink(shop.whatsapp, `Hi ${shop.name}, I found you on MobCheck and want to book an inspection.`)} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#157a3f] px-4 text-sm font-medium text-white hover:bg-[#106533]">
                     <MessageCircle className="h-4 w-4" aria-hidden />WhatsApp
                   </a>
                 )}
@@ -209,7 +209,7 @@ export default function ShopProfile({ shop, reviews, breakdown, fee, isOwner }: 
                     </li>
                   ))}
                 </ul>
-                {shop.services.length === 0 && <p className="border-t border-slate-100 px-5 py-3 text-sm text-slate-500">This shop hasn&apos;t listed its repair services yet.</p>}
+                {shop.services.length === 0 && <p className="border-t border-slate-100 px-5 py-3 text-sm text-slate-600">This shop hasn&apos;t listed its repair services yet.</p>}
               </Card>
             </section>
 
@@ -231,7 +231,7 @@ export default function ShopProfile({ shop, reviews, breakdown, fee, isOwner }: 
                     <div>
                       <p className="text-4xl font-semibold">{shop.averageRating?.toFixed(1)}</p>
                       <Stars value={shop.averageRating || 0} size="md" />
-                      <p className="mt-1 text-sm text-slate-500">{shop.totalReviews} reviews</p>
+                      <p className="mt-1 text-sm text-slate-600">{shop.totalReviews} reviews</p>
                     </div>
                     <ul className="space-y-1.5">
                       {[5, 4, 3, 2, 1].map((n) => {
@@ -240,7 +240,7 @@ export default function ShopProfile({ shop, reviews, breakdown, fee, isOwner }: 
                           <li key={n} className="flex items-center gap-3 text-sm">
                             <span className="w-3 text-slate-600">{n}</span>
                             <span className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100"><span className="block h-full rounded-full bg-amber-400" style={{ width: `${pct}%` }} /></span>
-                            <span className="w-8 text-right text-slate-500">{breakdown[n] || 0}</span>
+                            <span className="w-8 text-right text-slate-600">{breakdown[n] || 0}</span>
                           </li>
                         );
                       })}
@@ -251,9 +251,9 @@ export default function ShopProfile({ shop, reviews, breakdown, fee, isOwner }: 
                       <li key={r.id} className="rounded-xl border border-slate-200 bg-white p-5">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex items-center gap-2"><Stars value={r.overallRating} /><span className="text-sm font-medium">{r.author}</span></div>
-                          <span className="text-xs text-slate-500">{formatDate(r.createdAt)}</span>
+                          <span className="text-xs text-slate-600">{formatDate(r.createdAt)}</span>
                         </div>
-                        <p className="mt-1 text-xs text-slate-500">Inspected: {r.device}{r.wouldRecommend ? ' · Recommends this shop' : ''}</p>
+                        <p className="mt-1 text-xs text-slate-600">Inspected: {r.device}{r.wouldRecommend ? ' · Recommends this shop' : ''}</p>
                         {r.reviewText && <p className="mt-2 text-sm text-slate-700">{r.reviewText}</p>}
                       </li>
                     ))}
@@ -280,7 +280,7 @@ export default function ShopProfile({ shop, reviews, breakdown, fee, isOwner }: 
                   <Clock className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
                   <div>
                     <p>{shop.openingHour && shop.closingHour ? `${shop.openingHour} – ${shop.closingHour}` : 'Hours not listed'}</p>
-                    <p className="text-slate-500">{shop.weeklyHolidays.length ? `Closed ${shop.weeklyHolidays.join(', ')}` : 'Open every day'}</p>
+                    <p className="text-slate-600">{shop.weeklyHolidays.length ? `Closed ${shop.weeklyHolidays.join(', ')}` : 'Open every day'}</p>
                   </div>
                 </div>
                 <a href={`tel:${shop.phone}`} className="flex gap-3 hover:text-brand-800"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />{shop.phone}</a>
@@ -311,9 +311,9 @@ export default function ShopProfile({ shop, reviews, breakdown, fee, isOwner }: 
 
             {!isOwner && (
               user ? (
-                <button type="button" onClick={() => setComplaintOpen(true)} className="flex w-full items-center justify-center gap-1.5 py-1 text-sm text-slate-500 hover:text-red-700"><Flag className="h-4 w-4" aria-hidden />Report a problem with this shop</button>
+                <button type="button" onClick={() => setComplaintOpen(true)} className="flex w-full items-center justify-center gap-1.5 py-1 text-sm text-slate-600 hover:text-red-700"><Flag className="h-4 w-4" aria-hidden />Report a problem with this shop</button>
               ) : (
-                <Link href={`/auth/login?next=${encodeURIComponent(`/shops/${shop.slug}`)}`} className="flex w-full items-center justify-center gap-1.5 py-1 text-sm text-slate-500 hover:text-red-700"><Flag className="h-4 w-4" aria-hidden />Log in to report a problem</Link>
+                <Link href={`/auth/login?next=${encodeURIComponent(`/shops/${shop.slug}`)}`} className="flex w-full items-center justify-center gap-1.5 py-1 text-sm text-slate-600 hover:text-red-700"><Flag className="h-4 w-4" aria-hidden />Log in to report a problem</Link>
               )
             )}
           </aside>

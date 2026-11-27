@@ -59,10 +59,10 @@ export default function AdminComplaint({ complaint }: any) {
           <CardBody className="space-y-4 text-sm">
             <p className="whitespace-pre-line text-slate-800">{complaint.description}</p>
             <dl className="grid grid-cols-[120px_1fr] gap-y-2 border-t border-slate-100 pt-4">
-              <dt className="text-slate-500">Customer</dt><dd>{fullName(complaint.customer)} · <a href={`mailto:${complaint.customer.email}`} className="link">{complaint.customer.email}</a>{complaint.customer.phone ? ` · ${complaint.customer.phone}` : ''}</dd>
-              <dt className="text-slate-500">Shop</dt><dd><Link href={`/admin/shops/${complaint.shop.id}`} className="link">{complaint.shop.name}</Link> ({complaint.shop.status.toLowerCase()})</dd>
-              <dt className="text-slate-500">Booking</dt><dd>{complaint.bookingId ? <Link href={`/admin/bookings/${complaint.bookingId}`} className="link">{bookingRef(complaint.bookingId)}</Link> : 'Not linked'}</dd>
-              {complaint.reviewedBy && (<><dt className="text-slate-500">Reviewed by</dt><dd>{fullName(complaint.reviewedBy)} on {formatDate(complaint.reviewedAt)}</dd></>)}
+              <dt className="text-slate-600">Customer</dt><dd>{fullName(complaint.customer)} · <a href={`mailto:${complaint.customer.email}`} className="link">{complaint.customer.email}</a>{complaint.customer.phone ? ` · ${complaint.customer.phone}` : ''}</dd>
+              <dt className="text-slate-600">Shop</dt><dd><Link href={`/admin/shops/${complaint.shop.id}`} className="link">{complaint.shop.name}</Link> ({complaint.shop.status.toLowerCase()})</dd>
+              <dt className="text-slate-600">Booking</dt><dd>{complaint.bookingId ? <Link href={`/admin/bookings/${complaint.bookingId}`} className="link">{bookingRef(complaint.bookingId)}</Link> : 'Not linked'}</dd>
+              {complaint.reviewedBy && (<><dt className="text-slate-600">Reviewed by</dt><dd>{fullName(complaint.reviewedBy)} on {formatDate(complaint.reviewedAt)}</dd></>)}
             </dl>
           </CardBody>
         </Card>

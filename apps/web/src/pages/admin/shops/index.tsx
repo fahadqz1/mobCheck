@@ -41,7 +41,7 @@ export default function AdminShops({ shops, counts }: any) {
               {shops.map((s: any) => (
                 <tr key={s.id} className="hover:bg-slate-50">
                   <Td><Link href={`/admin/shops/${s.id}`} className="font-medium text-ink hover:text-brand-800">{s.name}</Link></Td>
-                  <Td>{fullName(s.owner)}<br /><span className="text-xs text-slate-500">{s.owner.email}</span></Td>
+                  <Td>{fullName(s.owner)}<br /><span className="text-xs text-slate-600">{s.owner.email}</span></Td>
                   <Td>{s.area}, {s.city}</Td>
                   <Td>{s._count.inspectors}</Td>
                   <Td>{s._count.complaints}</Td>

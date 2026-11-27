@@ -80,14 +80,14 @@ export default function AdminShop({ shop }: any) {
           <CardHeader title="Shop details" />
           <CardBody>
             <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-sm">
-              <dt className="text-slate-500">Address</dt><dd>{shop.addressLine1}{shop.addressLine2 ? `, ${shop.addressLine2}` : ''}, {shop.area}, {shop.city}</dd>
-              <dt className="text-slate-500">Phone</dt><dd>{shop.phone}</dd>
-              <dt className="text-slate-500">Email</dt><dd className="break-all">{shop.email}</dd>
-              <dt className="text-slate-500">Hours</dt><dd>{shop.openingHour}–{shop.closingHour}</dd>
-              <dt className="text-slate-500">Inspectors</dt><dd>{shop._count.inspectors}</dd>
-              <dt className="text-slate-500">Services</dt><dd>{shop._count.services}</dd>
-              <dt className="text-slate-500">Bookings</dt><dd>{shop._count.inspectionBookings}</dd>
-              <dt className="text-slate-500">Verified</dt><dd>{shop.verifiedAt ? formatDate(shop.verifiedAt) : '—'}</dd>
+              <dt className="text-slate-600">Address</dt><dd>{shop.addressLine1}{shop.addressLine2 ? `, ${shop.addressLine2}` : ''}, {shop.area}, {shop.city}</dd>
+              <dt className="text-slate-600">Phone</dt><dd>{shop.phone}</dd>
+              <dt className="text-slate-600">Email</dt><dd className="break-all">{shop.email}</dd>
+              <dt className="text-slate-600">Hours</dt><dd>{shop.openingHour}–{shop.closingHour}</dd>
+              <dt className="text-slate-600">Inspectors</dt><dd>{shop._count.inspectors}</dd>
+              <dt className="text-slate-600">Services</dt><dd>{shop._count.services}</dd>
+              <dt className="text-slate-600">Bookings</dt><dd>{shop._count.inspectionBookings}</dd>
+              <dt className="text-slate-600">Verified</dt><dd>{shop.verifiedAt ? formatDate(shop.verifiedAt) : '—'}</dd>
             </dl>
           </CardBody>
         </Card>
@@ -95,36 +95,36 @@ export default function AdminShop({ shop }: any) {
           <CardHeader title="Owner" />
           <CardBody>
             <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-sm">
-              <dt className="text-slate-500">Name</dt><dd>{fullName(shop.owner)}</dd>
-              <dt className="text-slate-500">Email</dt><dd className="break-all">{shop.owner.email}</dd>
-              <dt className="text-slate-500">Phone</dt><dd>{shop.owner.phone || '—'}</dd>
-              <dt className="text-slate-500">Joined</dt><dd>{formatDate(shop.owner.createdAt)}</dd>
+              <dt className="text-slate-600">Name</dt><dd>{fullName(shop.owner)}</dd>
+              <dt className="text-slate-600">Email</dt><dd className="break-all">{shop.owner.email}</dd>
+              <dt className="text-slate-600">Phone</dt><dd>{shop.owner.phone || '—'}</dd>
+              <dt className="text-slate-600">Joined</dt><dd>{formatDate(shop.owner.createdAt)}</dd>
             </dl>
             <h3 className="mt-5 text-sm font-semibold">Documents</h3>
-            {shop.documents.length === 0 ? <p className="mt-1 text-sm text-slate-500">No documents uploaded. Collect them offline before verifying.</p> : (
+            {shop.documents.length === 0 ? <p className="mt-1 text-sm text-slate-600">No documents uploaded. Collect them offline before verifying.</p> : (
               <ul className="mt-2 space-y-1 text-sm">{shop.documents.map((d: any) => <li key={d.id}>{d.documentType.replace('_', ' ').toLowerCase()} · {d.status.toLowerCase()}</li>)}</ul>
             )}
           </CardBody>
         </Card>
         <Card>
           <CardHeader title="Recent complaints" action={<Link href="/admin/complaints" className="link text-sm">All complaints</Link>} />
-          {shop.complaints.length === 0 ? <CardBody><p className="text-sm text-slate-500">No complaints.</p></CardBody> : (
+          {shop.complaints.length === 0 ? <CardBody><p className="text-sm text-slate-600">No complaints.</p></CardBody> : (
             <ul className="divide-y divide-slate-100">
               {shop.complaints.map((c: any) => (
-                <li key={c.id}><Link href={`/admin/complaints/${c.id}`} className="flex justify-between px-5 py-3 text-sm hover:bg-slate-50"><span>{c.category.replace(/_/g, ' ').toLowerCase()}</span><span className="text-slate-500">{c.status.toLowerCase()} · {formatDate(c.createdAt)}</span></Link></li>
+                <li key={c.id}><Link href={`/admin/complaints/${c.id}`} className="flex justify-between px-5 py-3 text-sm hover:bg-slate-50"><span>{c.category.replace(/_/g, ' ').toLowerCase()}</span><span className="text-slate-600">{c.status.toLowerCase()} · {formatDate(c.createdAt)}</span></Link></li>
               ))}
             </ul>
           )}
         </Card>
         <Card>
           <CardHeader title="Suspension history" />
-          {shop.bans.length === 0 ? <CardBody><p className="text-sm text-slate-500">Never suspended.</p></CardBody> : (
+          {shop.bans.length === 0 ? <CardBody><p className="text-sm text-slate-600">Never suspended.</p></CardBody> : (
             <ul className="divide-y divide-slate-100">
               {shop.bans.map((b: any) => (
                 <li key={b.id} className="px-5 py-3 text-sm">
                   <p className="font-medium">{b.banType === 'PERMANENT_BAN' ? 'Permanent ban' : `Suspended until ${formatDate(b.suspendedUntil)}`}</p>
                   <p className="text-slate-600">{b.reason}</p>
-                  <p className="text-xs text-slate-500">by {fullName(b.bannedBy)} on {formatDate(b.bannedAt)}</p>
+                  <p className="text-xs text-slate-600">by {fullName(b.bannedBy)} on {formatDate(b.bannedAt)}</p>
                 </li>
               ))}
             </ul>

@@ -13,12 +13,12 @@ export function Stars({ value, size = 'sm' }: { value: number; size?: 'sm' | 'md
 }
 
 export function Rating({ value, count }: { value: number | null; count: number }) {
-  if (!value || count === 0) return <span className="text-sm text-slate-500">No reviews yet</span>;
+  if (!value || count === 0) return <span className="text-sm text-slate-600">No reviews yet</span>;
   return (
     <span className="inline-flex items-center gap-1.5 text-sm">
       <Stars value={value} />
       <span className="font-semibold">{value.toFixed(1)}</span>
-      <span className="text-slate-500">({count})</span>
+      <span className="text-slate-600">({count})</span>
       <span className="sr-only">{value.toFixed(1)} out of 5 from {count} reviews</span>
     </span>
   );

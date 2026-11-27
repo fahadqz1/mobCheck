@@ -150,7 +150,7 @@ export default function ListingDetail({ listing, similar, isOwner }: Props) {
   return (
     <SiteLayout title={listing.title}>
       <div className="page-container py-6 sm:py-8">
-        <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1 text-sm text-slate-500">
+        <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1 text-sm text-slate-600">
           <Link href="/marketplace" className="hover:text-ink">Phones</Link>
           <ChevronRight className="h-3.5 w-3.5" aria-hidden />
           <Link href={`/marketplace?q=${encodeURIComponent(listing.brand.name)}`} className="hover:text-ink">{listing.brand.name}</Link>
@@ -167,10 +167,10 @@ export default function ListingDetail({ listing, similar, isOwner }: Props) {
 
             <section aria-labelledby="specs">
               <h2 id="specs" className="text-lg font-semibold">Specifications</h2>
-              <dl className="mt-3 grid overflow-hidden rounded-xl border border-slate-200 bg-white sm:grid-cols-2">
+              <dl className="mt-3 grid overflow-hidden rounded-2xl border border-slate-200 bg-white sm:grid-cols-2">
                 {specs.map(([label, value]) => (
                   <div key={label} className="flex items-center justify-between gap-4 border-b border-slate-100 px-4 py-3 text-sm sm:[&:nth-last-child(-n+2)]:border-b-0">
-                    <dt className="text-slate-500">{label}</dt>
+                    <dt className="text-slate-600">{label}</dt>
                     <dd className="text-right font-medium text-ink">{value}</dd>
                   </div>
                 ))}
@@ -185,15 +185,15 @@ export default function ListingDetail({ listing, similar, isOwner }: Props) {
               <InfoRow icon={Wrench} title="Repair history" text={listing.repairHistory || 'Not disclosed by the seller'} muted={!listing.repairHistory} />
               <InfoRow icon={Box} title="Included accessories" text={accessories.length ? accessories.join(', ') : 'None listed'} muted={!accessories.length} />
               <InfoRow icon={BatteryMedium} title="Battery" text={listing.batteryHealth ? `${listing.batteryHealth}% maximum capacity, as stated by the seller` : 'Battery health not stated'} muted={!listing.batteryHealth} />
-              <p className="text-xs text-slate-500">Details on this page are provided by the seller and have not been checked by MobCheck. Book an inspection to have them verified.</p>
+              <p className="text-xs text-slate-600">Details on this page are provided by the seller and have not been checked by MobCheck. Book an inspection to have them verified.</p>
             </section>
           </div>
 
           <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
             <Card className="p-5">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{listing.brand.name}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-600">{listing.brand.name}</p>
               <h1 className="mt-1 text-xl font-semibold leading-snug">{listing.title}</h1>
-              <p className="mt-3 text-3xl font-semibold tabular-nums" data-testid="listing-price">{formatPKR(listing.pricePkr)}</p>
+              <p className="mt-3 font-display text-4xl font-extrabold tracking-tight tabular-nums" data-testid="listing-price">{formatPKR(listing.pricePkr)}</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 <Badge>{CONDITION_LABEL[listing.condition]}</Badge>
                 <Badge tone={PTA_TONE[listing.ptaStatus]}>{PTA_LABEL[listing.ptaStatus]}</Badge>
@@ -208,7 +208,7 @@ export default function ListingDetail({ listing, similar, isOwner }: Props) {
               {isOwner ? (
                 <div className="mt-5 space-y-2">
                   <LinkButton href={`/dashboard/listings/${listing.id}`} className="w-full" size="lg">Manage listing</LinkButton>
-                  <p className="text-center text-xs text-slate-500">{listing.viewCount} views</p>
+                  <p className="text-center text-xs text-slate-600">{listing.viewCount} views</p>
                 </div>
               ) : !sold ? (
                 <div className="mt-5 grid gap-2">
@@ -221,7 +221,7 @@ export default function ListingDetail({ listing, similar, isOwner }: Props) {
                     listing.seller.whatsapp === 'hidden' ? (
                       <LinkButton href={loginHref} variant="whatsapp" size="lg"><MessageCircle className="h-4 w-4" aria-hidden />Log in for WhatsApp</LinkButton>
                     ) : (
-                      <a href={whatsappLink(listing.seller.whatsapp, `Hi, is your ${name} (${listingRef(listing.id)}) on MobCheck still available?`)} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#1f8f4e] px-6 text-base font-medium text-white hover:bg-[#187a42]">
+                      <a href={whatsappLink(listing.seller.whatsapp, `Hi, is your ${name} (${listingRef(listing.id)}) on MobCheck still available?`)} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#157a3f] px-6 text-base font-medium text-white hover:bg-[#106533]">
                         <MessageCircle className="h-4 w-4" aria-hidden />WhatsApp seller
                       </a>
                     )
@@ -239,12 +239,12 @@ export default function ListingDetail({ listing, similar, isOwner }: Props) {
                 <Avatar name={listing.seller.name} size="lg" />
                 <div className="min-w-0">
                   <p className="truncate font-medium">{listing.seller.name}</p>
-                  <p className="text-xs text-slate-500">Member since {formatDate(listing.seller.memberSince)}</p>
+                  <p className="text-xs text-slate-600">Member since {formatDate(listing.seller.memberSince)}</p>
                 </div>
               </div>
               <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-500">Active listings</dt><dd className="mt-0.5 font-semibold">{listing.seller.activeListings}</dd></div>
-                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-500">Seller rating</dt><dd className="mt-0.5 font-semibold">{listing.seller.rating ? `${listing.seller.rating.toFixed(1)} / 5` : 'No ratings yet'}</dd></div>
+                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-600">Active listings</dt><dd className="mt-0.5 font-semibold">{listing.seller.activeListings}</dd></div>
+                <div className="rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-600">Seller rating</dt><dd className="mt-0.5 font-semibold">{listing.seller.rating ? `${listing.seller.rating.toFixed(1)} / 5` : 'No ratings yet'}</dd></div>
               </dl>
               {listing.shop && listing.shop.status === 'VERIFIED' && (
                 <Link href={`/shops/${listing.shop.slug}`} className="mt-3 flex items-center gap-2 rounded-lg border border-slate-200 p-3 text-sm hover:bg-slate-50">
@@ -260,11 +260,11 @@ export default function ListingDetail({ listing, similar, isOwner }: Props) {
 
             {!isOwner && (
               user ? (
-                <button type="button" onClick={() => setReportOpen(true)} className="flex w-full items-center justify-center gap-1.5 py-1 text-sm text-slate-500 hover:text-red-700">
+                <button type="button" onClick={() => setReportOpen(true)} className="flex w-full items-center justify-center gap-1.5 py-1 text-sm text-slate-600 hover:text-red-700">
                   <Flag className="h-4 w-4" aria-hidden />Report this listing
                 </button>
               ) : (
-                <Link href={loginHref} className="flex w-full items-center justify-center gap-1.5 py-1 text-sm text-slate-500 hover:text-red-700">
+                <Link href={loginHref} className="flex w-full items-center justify-center gap-1.5 py-1 text-sm text-slate-600 hover:text-red-700">
                   <Flag className="h-4 w-4" aria-hidden />Log in to report this listing
                 </Link>
               )
@@ -291,10 +291,10 @@ export default function ListingDetail({ listing, similar, isOwner }: Props) {
 function InfoRow({ icon: Icon, title, text, muted }: { icon: any; title: string; text: string; muted?: boolean }) {
   return (
     <div className="flex gap-3">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500"><Icon className="h-4 w-4" /></span>
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><Icon className="h-4 w-4" /></span>
       <div>
         <p className="text-sm font-medium">{title}</p>
-        <p className={muted ? 'text-sm text-slate-500' : 'text-sm text-slate-700'}>{text}</p>
+        <p className={muted ? 'text-sm text-slate-600' : 'text-sm text-slate-700'}>{text}</p>
       </div>
     </div>
   );

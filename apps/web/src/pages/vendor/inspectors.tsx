@@ -142,8 +142,8 @@ export default function VendorInspectors({ hasShop, inspectors }: Props) {
                 <Avatar name={i.name} size="lg" />
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">{i.name}</p>
-                  <p className="truncate text-sm text-slate-500">{i.email}</p>
-                  <p className="mt-1 text-xs text-slate-500">{DAYS.filter(([k]) => i[k]).map(([, l]) => l).join(', ') || 'No days'}{i.startTime && i.endTime ? ` · ${i.startTime}–${i.endTime}` : ''} · {i.completed} completed</p>
+                  <p className="truncate text-sm text-slate-600">{i.email}</p>
+                  <p className="mt-1 text-xs text-slate-600">{DAYS.filter(([k]) => i[k]).map(([, l]) => l).join(', ') || 'No days'}{i.startTime && i.endTime ? ` · ${i.startTime}–${i.endTime}` : ''} · {i.completed} completed</p>
                 </div>
                 <Badge tone={i.status === 'ACTIVE' ? 'success' : 'neutral'}>{i.status === 'ACTIVE' ? 'Active' : 'Inactive'}</Badge>
                 <Button variant="ghost" size="sm" onClick={() => setEditing(i)} aria-label={`Edit ${i.name}`}><Pencil className="h-4 w-4" /></Button>
@@ -170,12 +170,12 @@ export default function VendorInspectors({ hasShop, inspectors }: Props) {
           <div className="space-y-4">
             <Alert tone="warning" title="Copy this password now">It won&apos;t be shown again. Ask the inspector to change it after their first login.</Alert>
             <dl className="space-y-2 rounded-lg bg-slate-50 p-4 text-sm">
-              <div className="flex justify-between gap-4"><dt className="text-slate-500">Email</dt><dd className="font-medium">{created.email}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-600">Email</dt><dd className="font-medium">{created.email}</dd></div>
               <div className="flex items-center justify-between gap-4">
-                <dt className="text-slate-500">Temporary password</dt>
+                <dt className="text-slate-600">Temporary password</dt>
                 <dd className="flex items-center gap-2 font-mono font-medium" data-testid="temp-password">
                   {created.temporaryPassword}
-                  <button type="button" aria-label="Copy password" onClick={() => navigator.clipboard?.writeText(created.temporaryPassword).then(() => toast('success', 'Copied'))} className="rounded p-1 text-slate-500 hover:bg-slate-200"><Copy className="h-4 w-4" /></button>
+                  <button type="button" aria-label="Copy password" onClick={() => navigator.clipboard?.writeText(created.temporaryPassword).then(() => toast('success', 'Copied'))} className="rounded p-1 text-slate-600 hover:bg-slate-200"><Copy className="h-4 w-4" /></button>
                 </dd>
               </div>
             </dl>

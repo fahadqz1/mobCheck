@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { api, SESSION_EXPIRED_EVENT } from '@/lib/client';
 
@@ -55,7 +55,9 @@ export function AuthProvider({ initialUser, children }: { initialUser?: ClientUs
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const loggingOut = useRef(false);
   const logout = useCallback(async () => {
+    loggingOut.current = true;
     await api('/api/auth/logout', { method: 'POST' }).catch(() => {});
     setUser(null);
     try {
@@ -63,11 +65,14 @@ export function AuthProvider({ initialUser, children }: { initialUser?: ClientUs
     } catch {
       // storage unavailable
     }
-    router.push('/');
+    await router.push('/');
+    loggingOut.current = false;
   }, [router, setUser]);
 
   useEffect(() => {
     const onExpired = () => {
+      // Requests that were in flight during an intentional logout are expected to 401.
+      if (loggingOut.current) return;
       setUser(null);
       const next = encodeURIComponent(router.asPath);
       router.push(`/auth/login?expired=1&next=${next}`);

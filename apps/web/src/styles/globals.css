@@ -7,14 +7,18 @@
     -webkit-text-size-adjust: 100%;
   }
   body {
-    @apply bg-slate-50 font-sans text-ink antialiased;
+    @apply bg-[#f6f7f4] font-sans text-ink antialiased;
     font-feature-settings: 'cv11', 'ss01';
   }
   h1, h2, h3, h4 {
     @apply font-semibold tracking-tight text-ink;
   }
+  h1, h2 {
+    @apply font-display;
+    font-variation-settings: 'opsz' 48;
+  }
   :focus-visible {
-    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white;
+    @apply outline-none ring-2 ring-ink ring-offset-2 ring-offset-white;
   }
   [type='number']::-webkit-inner-spin-button {
     @apply opacity-50;
@@ -29,13 +33,61 @@
     @apply text-sm font-medium text-slate-700;
   }
   .link {
-    @apply font-medium text-brand-700 underline-offset-4 hover:underline;
+    @apply font-medium text-ink underline decoration-slate-300 underline-offset-4 hover:decoration-ink;
+  }
+  .display {
+    @apply font-display font-extrabold tracking-[-0.03em];
+  }
+
+  /* Liquid glass: translucent, blurred surface with a specular top edge.
+     Text on glass is always ink; a solid fallback applies when transparency is reduced. */
+  .glass {
+    @apply relative border border-white/60 bg-white/60 shadow-glass;
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+  }
+  .glass-strong {
+    @apply relative border border-white/70 bg-white/80 shadow-glass;
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+  }
+  .glass-dark {
+    @apply relative border border-white/15 bg-ink/55 text-white;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 10px 30px -10px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+  }
+  /* Soft sheen that follows the pointer (set --mx/--my from JS). */
+  .liquid-sheen {
+    background-image: radial-gradient(240px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, 0.55), transparent 60%);
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-strong {
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .glass-dark {
+    background: #0b1220 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

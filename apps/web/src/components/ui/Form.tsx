@@ -2,11 +2,11 @@ import { forwardRef, useId } from 'react';
 import { cn } from '@/lib/cn';
 
 const controlBase =
-  'block w-full rounded-lg border bg-white text-sm text-ink placeholder:text-slate-400 transition-colors ' +
-  'focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-600 disabled:bg-slate-50 disabled:text-slate-500';
+  'block w-full rounded-xl border bg-white text-sm text-ink placeholder:text-slate-400 transition-colors ' +
+  'focus:outline-none focus:ring-2 focus:ring-ink/15 focus:border-ink disabled:bg-slate-50 disabled:text-slate-600';
 
 const controlState = (invalid?: boolean) =>
-  invalid ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-300 hover:border-slate-400';
+  invalid ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-300 hover:border-slate-500';
 
 type FieldProps = {
   label: string;
@@ -32,7 +32,7 @@ export function Field({ label, error, hint, required, className, children }: Fie
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="text-sm text-slate-500">
+        <p id={`${id}-hint`} className="text-sm text-slate-600">
           {hint}
         </p>
       ) : null}
@@ -68,7 +68,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
 export function Checkbox({ label, className, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label: React.ReactNode }) {
   return (
     <label className={cn('inline-flex cursor-pointer items-center gap-2 text-sm text-slate-700', className)}>
-      <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-brand-700 focus:ring-brand-500" {...props} />
+      <input type="checkbox" className="h-4 w-4 rounded border-slate-300 accent-ink focus:ring-ink" {...props} />
       {label}
     </label>
   );

@@ -41,7 +41,7 @@ export default function AdminComplaints({ complaints, openCount }: any) {
             <tbody>
               {complaints.map((c: any) => (
                 <tr key={c.id} className="hover:bg-slate-50">
-                  <Td><Link href={`/admin/complaints/${c.id}`} className="font-medium capitalize text-ink hover:text-brand-800">{c.category.replace(/_/g, ' ').toLowerCase()}</Link><p className="max-w-sm truncate text-xs text-slate-500">{c.description}</p></Td>
+                  <Td><Link href={`/admin/complaints/${c.id}`} className="font-medium capitalize text-ink hover:text-brand-800">{c.category.replace(/_/g, ' ').toLowerCase()}</Link><p className="max-w-sm truncate text-xs text-slate-600">{c.description}</p></Td>
                   <Td>{c.shop.name}</Td>
                   <Td>{fullName(c.customer)}</Td>
                   <Td>{formatDate(c.createdAt)}</Td>

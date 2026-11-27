@@ -108,7 +108,7 @@ export default function PublicReport({ report, reportNumber, qr }: Props) {
         <Card className="mt-6 p-6">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-sm text-slate-500">Report {report.reportNumber}</p>
+              <p className="text-sm text-slate-600">Report {report.reportNumber}</p>
               <h1 className="mt-1 text-2xl font-semibold">{report.device}{report.storageGb ? ` · ${report.storageGb} GB` : ''}</h1>
               <p className="mt-1 text-sm text-slate-600">Inspected by <Link href={`/shops/${report.shop.slug}`} className="link">{report.shop.name}</Link>, {report.shop.city} · {formatDate(report.issuedAt, true)}</p>
               <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -129,7 +129,7 @@ export default function PublicReport({ report, reportNumber, qr }: Props) {
               </li>
             ))}
           </ul>
-          <p className="mt-6 flex gap-2 text-xs text-slate-500">
+          <p className="mt-6 flex gap-2 text-xs text-slate-600">
             <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
             For privacy, this public page leaves out the device IMEI, photos and the buyer&apos;s details. The full report is available to the person who booked the inspection. A report describes the phone at the time of inspection and is not a warranty.
           </p>

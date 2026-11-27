@@ -2,7 +2,7 @@ import { cn } from '@/lib/cn';
 
 export function Card({ className, children, as: Tag = 'div', ...props }: React.HTMLAttributes<HTMLElement> & { as?: 'div' | 'section' | 'article' }) {
   return (
-    <Tag className={cn('rounded-xl border border-slate-200 bg-white shadow-card', className)} {...props}>
+    <Tag className={cn('rounded-2xl border border-slate-200/80 bg-white shadow-card', className)} {...props}>
       {children}
     </Tag>
   );
@@ -32,7 +32,7 @@ export function StatCard({ label, value, hint, icon: Icon }: { label: string; va
         {Icon && <Icon className="h-4 w-4 text-slate-400" />}
       </div>
       <p className="mt-2 text-2xl font-semibold tabular-nums tracking-tight">{value}</p>
-      {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-slate-600">{hint}</p>}
     </Card>
   );
 }

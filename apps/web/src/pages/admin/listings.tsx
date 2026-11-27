@@ -93,8 +93,8 @@ export default function AdminListings({ listings, reported }: any) {
             <tbody>
               {listings.map((l: any) => (
                 <tr key={l.id} className="align-top">
-                  <Td><Link href={`/listings/${l.id}`} className="font-medium text-ink hover:text-brand-800">{l.title}</Link><p className="text-xs text-slate-500">{l.locationCity} · {formatDate(l.listedAt)}</p></Td>
-                  <Td>{fullName(l.user)}<p className="text-xs text-slate-500">{l.user.email}</p></Td>
+                  <Td><Link href={`/listings/${l.id}`} className="font-medium text-ink hover:text-brand-800">{l.title}</Link><p className="text-xs text-slate-600">{l.locationCity} · {formatDate(l.listedAt)}</p></Td>
+                  <Td>{fullName(l.user)}<p className="text-xs text-slate-600">{l.user.email}</p></Td>
                   <Td>{formatPKR(l.pricePkr)}</Td>
                   <Td>
                     {l.reports.length === 0 ? '—' : (

@@ -11,7 +11,8 @@ export class ApiError extends Error {
 export const SESSION_EXPIRED_EVENT = 'mobcheck:session-expired';
 
 // Same-origin fetch; the httpOnly session cookie is attached by the browser.
-export async function api<T = any>(url: string, options: { method?: string; body?: unknown; formData?: FormData } = {}): Promise<T> {
+// `background: true` is for polling: a 401 there must not trigger the session-expired redirect.
+export async function api<T = any>(url: string, options: { method?: string; body?: unknown; formData?: FormData; background?: boolean } = {}): Promise<T> {
   const res = await fetch(url, {
     method: options.method || (options.body || options.formData ? 'POST' : 'GET'),
     credentials: 'same-origin',
@@ -25,7 +26,7 @@ export async function api<T = any>(url: string, options: { method?: string; body
     // non-JSON response
   }
   if (!res.ok) {
-    if (res.status === 401 && typeof window !== 'undefined' && !url.startsWith('/api/auth/')) {
+    if (res.status === 401 && !options.background && typeof window !== 'undefined' && !url.startsWith('/api/auth/')) {
       window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
     }
     throw new ApiError(data?.error || `Request failed (${res.status})`, res.status, data?.fields);

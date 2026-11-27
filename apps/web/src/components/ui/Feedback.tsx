@@ -14,7 +14,7 @@ const badgeTones: Record<Tone, string> = {
 
 export function Badge({ tone = 'neutral', className, children }: { tone?: Tone; className?: string; children: React.ReactNode }) {
   return (
-    <span className={cn('inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset', badgeTones[tone], className)}>
+    <span className={cn('inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset', badgeTones[tone], className)}>
       {children}
     </span>
   );
@@ -77,10 +77,10 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn('flex flex-col items-center rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center', className)}>
+    <div className={cn('flex flex-col items-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center', className)}>
       {Icon && (
         <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-          <Icon className="h-6 w-6 text-slate-500" />
+          <Icon className="h-6 w-6 text-slate-600" />
         </div>
       )}
       <h3 className="text-base font-semibold">{title}</h3>

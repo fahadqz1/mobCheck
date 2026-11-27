@@ -114,6 +114,22 @@ export default function Marketplace({ listings, total, page, pages, brands }: Pr
             </div>
             <Button type="submit" size="lg" className="h-11">Search</Button>
           </form>
+          <div className="no-scrollbar -mx-4 mt-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0" aria-label="Quick brand filters" role="group">
+            {[{ slug: '', name: 'All brands' }, ...brands].map((b) => {
+              const active = (query.brand || '') === b.slug;
+              return (
+                <button
+                  key={b.slug || 'all'}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => apply({ brand: b.slug || undefined })}
+                  className={cn('h-9 shrink-0 rounded-full px-4 text-sm font-semibold transition active:scale-[0.97]', active ? 'bg-ink text-white' : 'bg-white text-ink ring-1 ring-inset ring-ink/10 hover:ring-ink/30')}
+                >
+                  {b.name === 'Apple' ? 'iPhone' : b.name}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 

@@ -16,7 +16,7 @@ export function NotificationBell() {
 
   const load = useCallback(async () => {
     try {
-      const data = await api<{ items: Item[]; unread: number }>('/api/notifications');
+      const data = await api<{ items: Item[]; unread: number }>('/api/notifications', { background: true });
       setItems(data.items);
       setUnread(data.unread);
     } catch {
@@ -58,7 +58,7 @@ export function NotificationBell() {
             {unread > 0 && <button type="button" onClick={markAll} className="text-xs font-medium text-brand-700 hover:underline">Mark all read</button>}
           </div>
           {items.length === 0 ? (
-            <p className="px-3.5 py-6 text-center text-sm text-slate-500">You&apos;re all caught up.</p>
+            <p className="px-3.5 py-6 text-center text-sm text-slate-600">You&apos;re all caught up.</p>
           ) : (
             <ul className="max-h-96 overflow-y-auto">
               {items.map((n) => (
@@ -73,7 +73,7 @@ export function NotificationBell() {
                     className={cn('block px-3.5 py-2.5 hover:bg-slate-50', !n.readAt && 'bg-brand-50/50')}
                   >
                     <p className={cn('text-sm', !n.readAt ? 'font-medium text-ink' : 'text-slate-700')}>{n.title}</p>
-                    {n.body && <p className="line-clamp-2 text-xs text-slate-500">{n.body}</p>}
+                    {n.body && <p className="line-clamp-2 text-xs text-slate-600">{n.body}</p>}
                     <p className="mt-0.5 text-[11px] text-slate-400">{timeAgo(n.createdAt)}</p>
                   </Link>
                 </li>

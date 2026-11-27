@@ -32,7 +32,7 @@ export function ImageSlot({
       <div className={cn('group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100', className)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {url && <img src={url} alt={label} className="h-full w-full object-cover" />}
-        {busy && <div className="absolute inset-0 flex items-center justify-center bg-white/60"><Loader2 className="h-6 w-6 animate-spin text-slate-500" /></div>}
+        {busy && <div className="absolute inset-0 flex items-center justify-center bg-white/60"><Loader2 className="h-6 w-6 animate-spin text-slate-600" /></div>}
         <div className={cn('absolute inset-0 flex items-center justify-center gap-2', url ? 'bg-slate-900/0 opacity-0 transition group-focus-within:opacity-100 group-hover:bg-slate-900/40 group-hover:opacity-100' : '')}>
           <button type="button" onClick={() => input.current?.click()} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-sm font-medium shadow">
             <ImagePlus className="h-4 w-4" aria-hidden />{url ? 'Replace' : 'Upload'}<span className="sr-only"> {label}</span>

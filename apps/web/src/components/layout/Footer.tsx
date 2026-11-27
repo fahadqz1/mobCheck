@@ -44,7 +44,7 @@ export function Footer() {
         ))}
       </div>
       <div className="border-t border-slate-100">
-        <p className="page-container py-5 text-xs text-slate-500">© {new Date().getFullYear()} MobCheck. All rights reserved.</p>
+        <p className="page-container py-5 text-xs text-slate-600">© {new Date().getFullYear()} MobCheck. All rights reserved.</p>
       </div>
     </footer>
   );

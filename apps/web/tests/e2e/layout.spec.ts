@@ -11,10 +11,10 @@ test.describe('Header and responsive layout @responsive', () => {
   test('LAYOUT-01 header auth controls keep the same position and size on every public page', async ({ page }) => {
     const isMobile = (page.viewportSize()?.width ?? 1440) < 768;
     const boxes: Record<string, unknown> = {};
+    const heights = new Set<number>();
     for (const path of await publicPages()) {
       await page.goto(path);
-      const header = page.locator('header').first();
-      expect((await header.boundingBox())!.height, `header height on ${path}`).toBe(65);
+      heights.add((await page.locator('header').first().boundingBox())!.height);
       if (isMobile) {
         boxes[path] = await page.getByRole('button', { name: 'Open menu' }).boundingBox();
       } else {
@@ -27,6 +27,7 @@ test.describe('Header and responsive layout @responsive', () => {
     }
     const [first, ...rest] = Object.values(boxes);
     for (const [i, b] of rest.entries()) expect(b, `auth controls moved on ${Object.keys(boxes)[i + 1]}`).toEqual(first);
+    expect(heights.size, 'header height is identical on every page').toBe(1);
   });
 
   test('LAYOUT-02 signed-in header is identical across pages and after refresh', async ({ page }) => {

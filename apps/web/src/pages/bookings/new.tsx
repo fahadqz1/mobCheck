@@ -123,7 +123,7 @@ export default function NewBooking({ shops, fixedShopId, brands, fee, prefill }:
                   <h2 className="text-base font-semibold">Shop</h2>
                   {fixedShopId && shop ? (
                     <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3 text-sm">
-                      <span><span className="font-medium">{shop.name}</span><span className="text-slate-500"> · {shop.area}, {shop.city}</span></span>
+                      <span><span className="font-medium">{shop.name}</span><span className="text-slate-600"> · {shop.area}, {shop.city}</span></span>
                       <Link href="/bookings/new" className="link">Change</Link>
                     </div>
                   ) : (
@@ -205,7 +205,7 @@ export default function NewBooking({ shops, fixedShopId, brands, fee, prefill }:
               <li className="flex gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" aria-hidden />Full refund if the shop declines</li>
             </ul>
           </Card>
-          <p className="text-xs text-slate-500">The shop only sees your contact details after you pay.</p>
+          <p className="text-xs text-slate-600">The shop only sees your contact details after you pay.</p>
         </aside>
       </div>
     </SiteLayout>

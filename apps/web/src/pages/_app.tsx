@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import '@fontsource-variable/inter';
+import '@fontsource-variable/bricolage-grotesque';
 import '../styles/globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { ToastProvider } from '@/components/ui/Toast';

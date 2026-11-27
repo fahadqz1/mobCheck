@@ -87,7 +87,7 @@ export default function AdminUsers({ users, page, pages, total }: any) {
             <tbody>
               {users.map((u: any) => (
                 <tr key={u.id}>
-                  <Td><p className="font-medium text-ink">{fullName(u)}</p><p className="text-xs text-slate-500">{u.email}</p></Td>
+                  <Td><p className="font-medium text-ink">{fullName(u)}</p><p className="text-xs text-slate-600">{u.email}</p></Td>
                   <Td>{ROLE_LABEL[u.role]}</Td>
                   <Td>{formatDate(u.createdAt)}</Td>
                   <Td>{u.lastLogin ? formatDate(u.lastLogin, true) : '—'}</Td>

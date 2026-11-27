@@ -46,7 +46,7 @@ export function PhotoPicker({
           <button
             type="button"
             onClick={() => input.current?.click()}
-            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-slate-300 bg-white text-slate-500 hover:border-brand-500 hover:text-brand-700"
+            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-slate-300 bg-white text-slate-600 hover:border-brand-500 hover:text-brand-700"
           >
             <ImagePlus className="h-6 w-6" aria-hidden />
             <span className="text-xs font-medium">Add photos</span>
@@ -67,7 +67,7 @@ export function PhotoPicker({
           e.target.value = '';
         }}
       />
-      <p className={cn('mt-2 text-sm', error ? 'text-red-600' : 'text-slate-500')}>
+      <p className={cn('mt-2 text-sm', error ? 'text-red-600' : 'text-slate-600')}>
         {error || `Up to ${max} photos, JPEG, PNG or WebP, 8 MB each. Show the front, back, sides and any damage.`}
       </p>
     </div>

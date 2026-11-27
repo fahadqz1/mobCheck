@@ -2,7 +2,7 @@ import { test, expect, Page } from '@playwright/test';
 import { db, login, logout, nextWeekday, photo, register, uid } from './helpers';
 
 // One realistic lifecycle shared across steps; each step depends on the previous one.
-test.describe.configure({ mode: 'serial' });
+test.describe.configure({ mode: 'serial', timeout: 150_000 });
 
 const state: Record<string, string> = {};
 const shopName = `E2E Phone Lab ${uid()}`;

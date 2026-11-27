@@ -67,7 +67,7 @@ export function Modal({ open, onClose, title, description, children, footer, siz
             <h2 id={titleId} className="text-lg font-semibold">{title}</h2>
             {description && <p className="mt-0.5 text-sm text-slate-600">{description}</p>}
           </div>
-          <button data-close type="button" onClick={onClose} className="-mr-1 rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-ink" aria-label="Close dialog">
+          <button data-close type="button" onClick={onClose} className="-mr-1 rounded-md p-1 text-slate-600 hover:bg-slate-100 hover:text-ink" aria-label="Close dialog">
             <X className="h-5 w-5" />
           </button>
         </div>

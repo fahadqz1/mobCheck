@@ -60,13 +60,13 @@ export default function Checkout({ payment, sandbox }: Props) {
     <SiteLayout title="Checkout" footer={false}>
       <div className="page-container max-w-md py-12">
         <Card className="p-6">
-          <div className="flex items-center gap-2 text-sm text-slate-500"><Lock className="h-4 w-4" aria-hidden />Secure checkout</div>
+          <div className="flex items-center gap-2 text-sm text-slate-600"><Lock className="h-4 w-4" aria-hidden />Secure checkout</div>
           <h1 className="mt-2 text-xl font-semibold">Pay for your inspection</h1>
           <dl className="mt-5 space-y-2 border-y border-slate-100 py-4 text-sm">
-            <div className="flex justify-between"><dt className="text-slate-500">Booking</dt><dd>{bookingRef(payment.bookingId)}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500">Device</dt><dd>{payment.device}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500">Shop</dt><dd>{payment.shop}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500">Appointment</dt><dd>{formatDate(payment.when, true)}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-600">Booking</dt><dd>{bookingRef(payment.bookingId)}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-600">Device</dt><dd>{payment.device}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-600">Shop</dt><dd>{payment.shop}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-600">Appointment</dt><dd>{formatDate(payment.when, true)}</dd></div>
           </dl>
           <div className="mt-4 flex items-baseline justify-between">
             <span className="text-sm text-slate-600">Total</span>

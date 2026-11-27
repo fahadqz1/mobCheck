@@ -165,7 +165,7 @@ export function InspectionWorkspace({ booking }: { booking: BookingView }) {
                     <li key={item.id} className="grid gap-2 sm:grid-cols-[1fr_200px] sm:items-start">
                       <div>
                         <p className="text-sm font-medium">{item.checkName}</p>
-                        {item.testInstructions && <p className="text-xs text-slate-500">{item.testInstructions}</p>}
+                        {item.testInstructions && <p className="text-xs text-slate-600">{item.testInstructions}</p>}
                         <Input
                           aria-label={`Notes for ${item.checkName}`}
                           placeholder="Notes (optional)"
@@ -216,7 +216,7 @@ export function InspectionWorkspace({ booking }: { booking: BookingView }) {
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-slate-500">{uploading ? <Loader2 className="inline h-4 w-4 animate-spin" /> : 'No photos yet.'}</p>
+            <p className="text-sm text-slate-600">{uploading ? <Loader2 className="inline h-4 w-4 animate-spin" /> : 'No photos yet.'}</p>
           )}
         </CardBody>
       </Card>
@@ -224,7 +224,7 @@ export function InspectionWorkspace({ booking }: { booking: BookingView }) {
       <div className="flex flex-col items-end gap-2">
         {error && <Alert tone="danger" title={error} className="w-full" />}
         <Button size="lg" loading={pending === 'submit'} onClick={submit} disabled={done < booking.checklist.length || photos.length === 0}>Submit inspection</Button>
-        {(done < booking.checklist.length || photos.length === 0) && <p className="text-sm text-slate-500">Record every item and add at least one photo to submit.</p>}
+        {(done < booking.checklist.length || photos.length === 0) && <p className="text-sm text-slate-600">Record every item and add at least one photo to submit.</p>}
       </div>
     </div>
   );

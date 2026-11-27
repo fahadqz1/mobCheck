@@ -40,7 +40,7 @@ export function BookingList({
             role="tab"
             aria-selected={current === t.key}
             href={{ pathname: router.pathname, query: t.key === tabs[0].key ? {} : { tab: t.key } }}
-            className={cn('-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium', current === t.key ? 'border-brand-700 text-brand-800' : 'border-transparent text-slate-500 hover:text-ink')}
+            className={cn('-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium', current === t.key ? 'border-brand-700 text-brand-800' : 'border-transparent text-slate-600 hover:text-ink')}
           >
             {t.label}
             {t.count !== undefined && <span className="ml-1.5 rounded-full bg-slate-100 px-1.5 text-xs text-slate-600">{t.count}</span>}

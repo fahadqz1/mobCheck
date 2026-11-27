@@ -60,7 +60,7 @@ export default function VendorSubscription({ hasShop, sub, price, sandbox }: any
           <Card>
             <CardHeader title="Shop plan" action={status && <Badge tone={TONE[status]}>{status === 'TRIAL' ? 'Free trial' : status.toLowerCase()}</Badge>} />
             <CardBody className="space-y-5">
-              <p className="text-3xl font-semibold">{formatPKR(price)}<span className="text-base font-normal text-slate-500"> / month</span></p>
+              <p className="text-3xl font-semibold">{formatPKR(price)}<span className="text-base font-normal text-slate-600"> / month</span></p>
               <ul className="space-y-2 text-sm text-slate-700">
                 {['Listed in the MobCheck shop directory', 'Accept paid inspection bookings', 'Unlimited inspectors and services', 'Verified badge and customer reviews'].map((f) => (
                   <li key={f} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-brand-700" aria-hidden />{f}</li>
@@ -68,8 +68,8 @@ export default function VendorSubscription({ hasShop, sub, price, sandbox }: any
               </ul>
               {sub && (
                 <dl className="grid grid-cols-[160px_1fr] gap-y-2 border-t border-slate-100 pt-4 text-sm">
-                  <dt className="text-slate-500">Current period</dt><dd>{formatDate(sub.currentPeriodStart)} – {formatDate(sub.currentPeriodEnd)}</dd>
-                  <dt className="text-slate-500">Last payment</dt><dd>{sub.lastPaymentDate ? formatDate(sub.lastPaymentDate) : 'None (trial)'}</dd>
+                  <dt className="text-slate-600">Current period</dt><dd>{formatDate(sub.currentPeriodStart)} – {formatDate(sub.currentPeriodEnd)}</dd>
+                  <dt className="text-slate-600">Last payment</dt><dd>{sub.lastPaymentDate ? formatDate(sub.lastPaymentDate) : 'None (trial)'}</dd>
                 </dl>
               )}
               {sub && status !== 'CANCELLED' && (
@@ -83,7 +83,7 @@ export default function VendorSubscription({ hasShop, sub, price, sandbox }: any
               {sandbox ? (
                 <>
                   <Button className="w-full" loading={pending === 'renew'} onClick={() => act({ action: 'renew' }, 'Subscription renewed for 30 days')}>{status === 'TRIAL' ? 'Start paid plan' : 'Renew for 30 days'} · {formatPKR(price)}</Button>
-                  <p className="text-xs text-slate-500">Sandbox mode: no payment gateway is connected, so renewal is simulated.</p>
+                  <p className="text-xs text-slate-600">Sandbox mode: no payment gateway is connected, so renewal is simulated.</p>
                 </>
               ) : (
                 <Alert tone="info" title="Online renewal coming soon">Contact MobCheck support to renew your plan.</Alert>

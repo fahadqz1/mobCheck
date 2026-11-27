@@ -33,7 +33,7 @@ export function PageHeader({ title, description, actions, breadcrumb }: { title:
   return (
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        {breadcrumb && <div className="mb-2 text-sm text-slate-500">{breadcrumb}</div>}
+        {breadcrumb && <div className="mb-2 text-sm text-slate-600">{breadcrumb}</div>}
         <h1 className="text-2xl font-semibold sm:text-[28px] sm:leading-9">{title}</h1>
         {description && <p className="mt-1 text-sm text-slate-600 sm:text-base">{description}</p>}
       </div>
@@ -59,11 +59,11 @@ export function DashboardLayout({ title, description, actions, children }: { tit
                 href={item.href}
                 aria-current={active(item.href) ? 'page' : undefined}
                 className={cn(
-                  'flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  active(item.href) ? 'bg-white text-brand-800 shadow-card ring-1 ring-slate-200' : 'text-slate-600 hover:bg-white/70 hover:text-ink'
+                  'flex shrink-0 items-center gap-2.5 rounded-full px-4 py-2 text-sm font-medium transition-colors',
+                  active(item.href) ? 'bg-ink text-white shadow-card' : 'text-slate-600 hover:bg-ink/5 hover:text-ink'
                 )}
               >
-                <item.icon className={cn('h-4 w-4', active(item.href) ? 'text-brand-700' : 'text-slate-400')} />
+                <item.icon className={cn('h-4 w-4', active(item.href) ? 'text-lime-300' : 'text-slate-400')} />
                 {item.label}
               </Link>
             ))}
