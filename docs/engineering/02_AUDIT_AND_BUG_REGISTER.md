@@ -47,4 +47,5 @@ Severity: Critical (blocks a core journey or exposes data) · High (major featur
 | BUG-U | Account menu accessible name did not include visible name | Medium | `aria-label` overrode visible text | Name built from visible text + sr-only suffix | A11Y-01 | Pass | Fixed |
 | BUG-V | Shop name clipped under cover image | Low | Negative margin on whole header row | Negative margin on logo only | Visual review | Pass | Fixed |
 | BUG-W | Sort select stretched full width | Low | `w-full` base class beat width override | Wrapper width | Visual review | Pass | Fixed |
-| BUG-X | Android inspections impossible | High | No Android checklist rows | Insert-only script (pending approval for dev DB) | J-12 uses iPhone; script verified on test DB | Pass on test DB | Pending approval |
+| BUG-X | Android inspections impossible | High | No Android checklist rows | Insert-only script, applied to test and dev DBs | Row counts: 31 iPhone + 31 Android on dev | Pass | Fixed |
+| BUG-Y | Production build failed lint: eslint config lacked Next.js rules; unused variables | High (could not deploy) | Web app eslint config did not extend `next/core-web-vitals` | Added `apps/web/.eslintrc.json`; removed unused code; marked parameter-less GET routes dynamic so they are not frozen at build time | `next build` | Pass (79 routes) | Fixed |

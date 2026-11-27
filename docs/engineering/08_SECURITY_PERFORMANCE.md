@@ -28,21 +28,23 @@ Residual risks are listed in [Known issues](10_KNOWN_ISSUES.md) (in-memory rate 
 
 ## Performance
 
-Median of 5 warm requests against the **development** server (unminified, on-demand compilation, measured while the regression suite was also running). Production builds are typically several times faster.
+Median of 5 warm requests on the local machine against the **production build** (`next build` + `next start`), and against the development server for comparison.
 
-| Route | Median | HTML/JSON size |
-|---|---|---|
-| `/` | 89 ms | 39.3 KB |
-| `/marketplace` | 167 ms | 29.1 KB |
-| `/marketplace?city=Lahore&sort=price_asc` | 57 ms | 25.1 KB |
-| `/listings/[id]` | 108 ms | 22.6 KB |
-| `/shops` | 238 ms | 23.0 KB |
-| `/shops/hafeez-mobile-hub` | 258 ms | 17.6 KB |
-| `/verify` | 39 ms | 7.6 KB |
-| `GET /api/listings?city=Lahore` | 52 ms | 1.2 KB |
-| `GET /api/shops` | 39 ms | 1.5 KB |
-| `GET /api/brands` | 51 ms | 1.2 KB |
-| `GET /api/auth/me` | 124 ms | < 0.1 KB |
+| Route | Production | Development | HTML/JSON size |
+|---|---|---|---|
+| `/` | 97 ms | 89 ms | 39.6 KB |
+| `/marketplace` | 35 ms | 167 ms | 29.4 KB |
+| `/marketplace?city=Lahore&sort=price_asc` | 27 ms | 57 ms | 25.5 KB |
+| `/listings/[id]` | 42 ms | 108 ms | 23.0 KB |
+| `/shops` | 32 ms | 238 ms | 23.4 KB |
+| `/shops/hafeez-mobile-hub` | 46 ms | 258 ms | 18.0 KB |
+| `/verify` | 8 ms | 39 ms | 7.9 KB |
+| `GET /api/listings?city=Lahore` | 12 ms | 52 ms | 1.2 KB |
+| `GET /api/shops` | 11 ms | 39 ms | 1.5 KB |
+| `GET /api/brands` | 10 ms | 51 ms | 1.2 KB |
+| `GET /api/auth/me` | 4 ms | 124 ms | < 0.1 KB |
+
+Production build: all 79 routes compile; first-load JavaScript per page is 96–115 kB (92.5 kB shared framework). Production-only checks passed: session cookie is `Secure; HttpOnly; SameSite=lax`, the sandbox payment endpoint returns 404, `X-Powered-By` is absent.
 
 Optimisations applied:
 

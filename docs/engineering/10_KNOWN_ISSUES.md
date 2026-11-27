@@ -4,7 +4,6 @@
 |---|---|---|---|
 | KI-01 | No real payment gateway; the checkout is a signed sandbox (disabled in production) | Cannot take money yet | Integrate Safepay/PayFast hosted checkout → existing `/api/payments/webhook` |
 | KI-02 | Emails are not sent; password reset links are logged (and shown on screen in development only) | Users cannot reset passwords in production | Add SendGrid/SES in `forgot-password` |
-| KI-03 | Android checklist and the extended iPhone checklist are only in `mobcheck_test` | Android bookings cannot be inspected on the dev DB | Run `scripts/seed-checklists.mjs` on `mobcheck_dev` after approval |
 | KI-04 | Shop subscription renewal is simulated; `Payment.bookingId` is required so subscriptions cannot be billed through `Payment` | No real subscription billing | Migration: nullable `bookingId` + `purpose` column |
 | KI-05 | Review windows settle when bookings are viewed, not on a timer | A payout may stay "pending" until someone opens the booking | Add a scheduled job calling `settleExpiredReviewWindows()` |
 | KI-06 | Rate limiting is in-memory | Limits reset on restart and are per instance | Redis-backed limiter for production |
