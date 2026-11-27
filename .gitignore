@@ -50,6 +50,10 @@ temp/
 *.sqlite
 *.sqlite3
 .pgdata/
+apps/web/uploads/
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/.next-test/
 
 # Package manager lock files (optional - for reproducibility)
 package-lock.json

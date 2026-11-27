@@ -56,21 +56,53 @@ export const ShopRegistrationSchema = z.object({
   closingHour: z.string().optional(),
 });
 
-// Listing Validation
+const intInRange = (min: number, max: number, label: string, required: boolean) =>
+  z
+    .union([z.number(), z.string()])
+    .optional()
+    .transform((v, ctx): number | undefined => {
+      if (v === undefined || v === '') {
+        if (required) ctx.addIssue({ code: 'custom', message: `Enter ${label.toLowerCase()}` });
+        return undefined;
+      }
+      const n = Number(v);
+      if (!Number.isInteger(n)) ctx.addIssue({ code: 'custom', message: `${label} must be a whole number` });
+      else if (n < min) ctx.addIssue({ code: 'custom', message: `${label} must be at least ${min.toLocaleString()}` });
+      else if (n > max) ctx.addIssue({ code: 'custom', message: `${label} must be at most ${max.toLocaleString()}` });
+      return n;
+    });
+const optionalInt = (min: number, max: number, label: string) => intInRange(min, max, label, false);
+
 export const ListingSchema = z.object({
-  brandId: z.string().min(1, 'Brand required'),
-  modelId: z.string().min(1, 'Model required'),
-  storageGb: z.number().optional(),
-  ramGb: z.number().optional(),
-  color: z.string().optional(),
-  condition: z.enum(['BRAND_NEW', 'LIKE_NEW', 'EXCELLENT', 'GOOD', 'FAIR', 'FOR_PARTS']),
-  pricePkr: z.number().min(1, 'Price required'),
-  ptaStatus: z.enum(['APPROVED', 'NON_PTA', 'UNKNOWN', 'BLOCKED']).default('UNKNOWN'),
-  title: z.string().min(5, 'Title required'),
-  description: z.string().optional(),
-  locationCity: z.string().min(2, 'City required'),
-  locationArea: z.string().min(2, 'Area required'),
-  sellerContactPreference: z.enum(['WHATSAPP', 'EMAIL', 'PLATFORM', 'PHONE']),
+  brandId: z.string().min(1, 'Choose a brand'),
+  modelId: z.string().min(1, 'Choose a model'),
+  storageGb: optionalInt(8, 2048, 'Storage'),
+  ramGb: optionalInt(1, 32, 'RAM'),
+  color: z.string().trim().max(40).optional(),
+  condition: z.enum(['BRAND_NEW', 'LIKE_NEW', 'EXCELLENT', 'GOOD', 'FAIR', 'FOR_PARTS'], { errorMap: () => ({ message: 'Choose a condition' }) }),
+  pricePkr: intInRange(1000, 2_000_000, 'Price', true).transform((v) => v as number),
+  ptaStatus: z.enum(['APPROVED', 'NON_PTA', 'UNKNOWN']).default('UNKNOWN'),
+  batteryHealth: optionalInt(1, 100, 'Battery health'),
+  repairHistory: z.string().trim().max(500).optional(),
+  hasBox: z.boolean().default(false),
+  hasCharger: z.boolean().default(false),
+  hasAccessories: z.array(z.string().trim().min(1).max(40)).max(10).default([]),
+  title: z.string().trim().min(8, 'Title must be at least 8 characters').max(90, 'Keep the title under 90 characters'),
+  description: z.string().trim().max(2000, 'Keep the description under 2000 characters').optional(),
+  locationCity: z.string().trim().min(2, 'Choose a city'),
+  locationArea: z.string().trim().min(2, 'Enter your area').max(80),
+  sellerContactPreference: z.enum(['WHATSAPP', 'PLATFORM', 'PHONE']).default('PLATFORM'),
+});
+
+export const ListingStatusSchema = z.object({ status: z.enum(['ACTIVE', 'SOLD', 'REMOVED']) });
+
+export const InquirySchema = z.object({
+  message: z.string().trim().min(10, 'Write at least 10 characters').max(1000),
+});
+
+export const ListingReportSchema = z.object({
+  reason: z.enum(['SUSPECTED_SCAM', 'STOLEN_DEVICE', 'MISLEADING_DETAILS', 'WRONG_PRICE', 'ALREADY_SOLD', 'OFFENSIVE', 'OTHER'], { errorMap: () => ({ message: 'Choose a reason' }) }),
+  details: z.string().trim().max(1000).optional(),
 });
 
 // Inspection Booking Validation

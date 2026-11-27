@@ -1,125 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { ListingSchema } from '@/lib/validation';
-import { verifyJWT, getAuthToken } from '@/lib/auth';
+import { requireUser } from '@/lib/session';
+import { parseBody, serverError } from '@/lib/api';
+import { listingCardInclude } from '@/lib/queries';
+import { buildListingWhere, LISTING_PAGE_SIZE, listingOrder, toListingCard } from '@/lib/listing';
 
 export async function GET(request: NextRequest) {
   try {
-    const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '10');
-    const city = url.searchParams.get('city');
-    const brand = url.searchParams.get('brand');
-    const ptaStatus = url.searchParams.get('ptaStatus');
-
-    const skip = (page - 1) * limit;
-
-    const where: any = {
-      status: 'ACTIVE',
-    };
-
-    if (city) where.locationCity = city;
-    if (brand) where.brandId = brand;
-    if (ptaStatus) where.ptaStatus = ptaStatus;
-
+    const params = request.nextUrl.searchParams;
+    const page = Math.max(1, parseInt(params.get('page') || '1') || 1);
+    const where = buildListingWhere(params);
     const [listings, total] = await Promise.all([
       prisma.phoneListing.findMany({
         where,
-        include: {
-          brand: { select: { name: true, slug: true } },
-          model: { select: { name: true, slug: true } },
-          photos: { take: 1 },
-          user: {
-            select: {
-              firstName: true,
-              lastName: true,
-              id: true,
-            },
-          },
-        },
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
+        include: listingCardInclude,
+        orderBy: listingOrder(params.get('sort')),
+        skip: (page - 1) * LISTING_PAGE_SIZE,
+        take: LISTING_PAGE_SIZE,
       }),
       prisma.phoneListing.count({ where }),
     ]);
-
-    return NextResponse.json(
-      {
-        message: 'Listings retrieved successfully',
-        data: listings,
-        pagination: {
-          page,
-          limit,
-          total,
-          pages: Math.ceil(total / limit),
-        },
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      data: listings.map(toListingCard),
+      pagination: { page, pageSize: LISTING_PAGE_SIZE, total, pages: Math.max(1, Math.ceil(total / LISTING_PAGE_SIZE)) },
+    });
   } catch (error) {
-    console.error('Get listings error:', error);
-    return NextResponse.json(
-      { error: 'Failed to retrieve listings' },
-      { status: 500 }
-    );
+    return serverError('Get listings error', error, 'Could not load listings.');
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify auth
-    const token = getAuthToken(request);
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    const auth = await requireUser(request, ['CUSTOMER', 'SELLER', 'SHOP_OWNER']);
+    if (auth.response) return auth.response;
+    const parsed = await parseBody(request, ListingSchema);
+    if (parsed.response) return parsed.response;
+    const data = parsed.data;
 
-    const payload = await verifyJWT(token);
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
+    const model = await prisma.model.findUnique({ where: { id: data.modelId }, select: { brandId: true } });
+    if (!model || model.brandId !== data.brandId) {
+      return NextResponse.json({ error: 'Please correct the highlighted fields.', fields: { modelId: 'This model does not belong to the selected brand' } }, { status: 400 });
     }
-
-    const body = await request.json();
-    const validation = ListingSchema.safeParse(body);
-
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: validation.error.errors },
-        { status: 400 }
-      );
-    }
+    const shop = auth.user.role === 'SHOP_OWNER' ? await prisma.shop.findFirst({ where: { ownerId: auth.user.id }, select: { id: true } }) : null;
 
     const listing = await prisma.phoneListing.create({
-      data: {
-        ...validation.data,
-        userId: payload.userId,
-        status: 'ACTIVE',
-        listedAt: new Date(),
-      },
-      include: {
-        brand: true,
-        model: true,
-      },
+      data: { ...data, userId: auth.user.id, shopId: shop?.id, status: 'ACTIVE', listedAt: new Date() },
+      select: { id: true },
     });
-
-    return NextResponse.json(
-      {
-        message: 'Listing created successfully',
-        data: listing,
-      },
-      { status: 201 }
-    );
+    return NextResponse.json({ data: listing }, { status: 201 });
   } catch (error) {
-    console.error('Create listing error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create listing' },
-      { status: 500 }
-    );
+    return serverError('Create listing error', error, 'Could not create the listing.');
   }
 }

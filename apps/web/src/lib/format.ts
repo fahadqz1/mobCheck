@@ -111,5 +111,9 @@ export const whatsappLink = (phone: string, text: string) => {
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 };
 
-export const fullName = (u: { firstName?: string | null; lastName?: string | null } | null | undefined) =>
+export const fileUrl = (key: string | null | undefined) => (key ? `/api/files/${key}` : null);
+export const listingRef = (id: string) => `MC-L-${id.slice(-8).toUpperCase()}`;
+export const bookingRef = (id: string) => `MC-B-${id.slice(-8).toUpperCase()}`;
+
+export const fullName =(u: { firstName?: string | null; lastName?: string | null } | null | undefined) =>
   [u?.firstName, u?.lastName].filter(Boolean).join(' ') || 'MobCheck user';

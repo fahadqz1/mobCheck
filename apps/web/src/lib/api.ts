@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ZodError, ZodSchema } from 'zod';
+import { z, ZodError, ZodTypeAny } from 'zod';
 
 export function fieldErrors(error: ZodError) {
   const out: Record<string, string> = {};
@@ -10,12 +10,15 @@ export function fieldErrors(error: ZodError) {
   return out;
 }
 
-export async function parseBody<T>(request: Request, schema: ZodSchema<T>) {
+export async function parseBody<S extends ZodTypeAny>(
+  request: Request,
+  schema: S
+): Promise<{ data: z.output<S>; response?: undefined } | { data?: undefined; response: NextResponse }> {
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return { response: NextResponse.json({ error: 'Invalid request body' }, { status: 400 }) } as const;
+    return { response: NextResponse.json({ error: 'Invalid request body' }, { status: 400 }) };
   }
   const result = schema.safeParse(body);
   if (!result.success) {
@@ -24,9 +27,9 @@ export async function parseBody<T>(request: Request, schema: ZodSchema<T>) {
         { error: 'Please correct the highlighted fields.', fields: fieldErrors(result.error) },
         { status: 400 }
       ),
-    } as const;
+    };
   }
-  return { data: result.data } as const;
+  return { data: result.data };
 }
 
 export function serverError(context: string, error: unknown, message = 'Something went wrong. Please try again.') {
