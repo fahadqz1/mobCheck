@@ -1,98 +1,76 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
+import type { GetServerSideProps } from 'next';
+import { AuthShell, safeNext } from '@/components/auth/AuthShell';
+import { Field, Input } from '@/components/ui/Form';
+import { Button } from '@/components/ui/Button';
+import { Alert } from '@/components/ui/Feedback';
+import { api, ApiError } from '@/lib/client';
+import { ClientUser, notifyOtherTabs, useAuth } from '@/context/AuthContext';
+import { getSsrUser } from '@/lib/ssr-auth';
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const user = await getSsrUser(ctx);
+  if (user) return { redirect: { destination: safeNext(ctx.query.next), permanent: false } };
+  return { props: {} };
+};
 
 export default function Login() {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [fields, setFields] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
+    setFields({});
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Login failed');
-        return;
-      }
-
-      // Store token
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      router.push('/dashboard');
+      const { user } = await api<{ user: ClientUser }>('/api/auth/login', { body: { email, password } });
+      setUser(user);
+      notifyOtherTabs();
+      router.replace(safeNext(router.query.next));
     } catch (err) {
-      setError('An error occurred. Please try again.');
-    } finally {
+      const e = err as ApiError;
+      setError(e.message);
+      setFields(e.fields || {});
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-100 flex items-center justify-center px-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center text-indigo-600 mb-8">MobCheck</h1>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-indigo-600"
-              placeholder="your@email.com"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-indigo-600"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 text-white font-semibold py-3 rounded hover:bg-indigo-700 disabled:bg-gray-400"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            Don't have an account?{' '}
-            <a href="/auth/register" className="text-indigo-600 font-semibold hover:underline">
-              Register here
-            </a>
-          </p>
+    <AuthShell
+      title="Log in"
+      subtitle={
+        <>
+          New to MobCheck? <Link href={{ pathname: '/auth/register', query: router.query.next ? { next: router.query.next } : {} }} className="link">Create an account</Link>
+        </>
+      }
+    >
+      {router.query.expired && !error && (
+        <Alert tone="warning" title="Your session has ended" className="mb-5">Please log in again to continue.</Alert>
+      )}
+      {router.query.reset && !error && (
+        <Alert tone="success" title="Password updated" className="mb-5">Log in with your new password.</Alert>
+      )}
+      {error && <Alert tone="danger" title={error} className="mb-5" />}
+      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+        <Field label="Email address" error={fields.email}>
+          {(p) => <Input {...p} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />}
+        </Field>
+        <Field label="Password" error={fields.password}>
+          {(p) => <Input {...p} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />}
+        </Field>
+        <div className="flex justify-end">
+          <Link href="/auth/forgot-password" className="text-sm font-medium text-brand-700 hover:underline">Forgot password?</Link>
         </div>
-      </div>
-    </div>
+        <Button type="submit" size="lg" className="w-full" loading={loading}>Log in</Button>
+      </form>
+    </AuthShell>
   );
 }

@@ -1,0 +1,51 @@
+# Application Audit, UI/UX Audit & Bug Register
+
+## Tools used
+
+Claude Code with: file search/read/edit, PowerShell, Git, Playwright 1.65 (system Chrome), `@axe-core/playwright` (WCAG 2.1 AA), Prisma CLI, TypeScript compiler, and screenshots reviewed visually at 390/1280/1440px. The Claude Code skills available in this environment cover artifacts, code review, security review and simplification; none are specific to Next.js, Prisma or Playwright, so the work used those tools directly. No skill was claimed that was not used.
+
+## Audit summary (state before this work)
+
+| Area | Finding |
+|---|---|
+| Pages | 5 pages existed (home, marketplace, shops, login, register) + a minimal dashboard. Missing: listing detail, listing creation, shop profile, shop registration UI, vendor/inspector/admin dashboards, booking, checkout, report, reviews, notifications, profile, forgot password, error pages |
+| Navigation | Each page had its own header copy; login/register pages had none; links pointed to non-existent routes (`/vendor/dashboard`, `/inspector/dashboard`, `/admin/dashboard`) |
+| Dead controls | Marketplace "View" buttons, search box and condition filter did nothing; shop "Book Inspection" did nothing |
+| Auth | JWT in `localStorage`, read only by the dashboard (see BUG-D) |
+| APIs | 22 handlers; none had a UI. Several crashed or had logic errors (see register) |
+| Data | Ratings and review counts shown without any reviews; Android checklist missing |
+| UI/UX | Generic indigo gradients and emoji icons, inconsistent spacing, buttons of different sizes per page, no loading/empty/error states, no focus styles, no mobile navigation |
+
+## Bug register
+
+"Result" refers to the regression run on 27 Nov 2026 (46 tests: 43 passed, 0 failed, 3 skipped by design). See [07_TEST_REPORT.md](07_TEST_REPORT.md).
+
+Severity: Critical (blocks a core journey or exposes data) · High (major feature broken or misleading) · Medium · Low.
+
+| ID | Description | Severity | Root cause | Fix | Test case | Result | Status |
+|---|---|---|---|---|---|---|---|
+| BUG-A | Login/Register buttons move and change size between pages; no mobile navigation | High | Duplicated per-page headers with different markup; auth pages had none | Single `Header` in every layout with a fixed-width auth slot and loading skeleton; accessible mobile menu | LAYOUT-01, LAYOUT-02, LAYOUT-03 | Pass | Fixed |
+| BUG-B | No phone listing detail page | Critical | Never built; card button had no handler | `/listings/[id]` with gallery, specs, seller, contact, WhatsApp, report, book, similar | J-01, J-02, J-03 | Pass | Fixed |
+| BUG-C | No shop profile page | Critical | Never built | `/shops/[slug]` (see page specs) | J-06, J-10, AUTH-02 | Pass | Fixed |
+| BUG-D | Session/user data disappears between pages | Critical | Token in `localStorage`, only dashboard read it, static headers, no cookie | Server-side sessions in httpOnly cookie + SSR auth + shared AuthProvider | AUTH-01…AUTH-12 | Pass | Fixed |
+| BUG-E | Every API route under `pages/api` failed | Critical | App-router handlers placed in the pages router | Moved to `src/app/api/**/route.ts` | All API tests | Pass | Fixed (earlier commit) |
+| BUG-F | Prisma schema invalid; migrations impossible | Critical | ~15 relation definition errors | Corrected relations | DB report | Pass | Fixed (earlier commit) |
+| BUG-G | Inspectors could never submit results | High | Compared `Inspector.id` to `User.id` | Party resolution via `loadBookingFor` | J-09 | Pass | Fixed |
+| BUG-H | Payment webhook would throw on every event | High | Wrote `payment.success` into `WebhookType` enum | Mapped event types | J-07 (signed sandbox event) | Pass | Fixed |
+| BUG-I | Webhook signature check weak | High | HMAC over re-serialised JSON, non-constant-time compare, default secret in production | Verify raw body with `timingSafeEqual`; secret required in production; idempotent on event id | J-07, J-12 | Pass | Fixed |
+| BUG-J | Evidence upload stored nothing; fake `storage.example.com` URLs | High | Placeholder implementation | Real storage with magic-byte validation and access-checked serving | J-09 | Pass | Fixed |
+| BUG-K | Reviews could be posted for any booking and any shop id | High | No status check; `shopId` taken from the request body | Review only on COMPLETED bookings of the caller; shop taken from the booking | J-10 | Pass | Fixed |
+| BUG-L | Complaint creation logged the customer as an admin in `AdminAction` | Medium | Wrong field use | Removed; admins notified instead | J-14 | Pass | Fixed |
+| BUG-M | Shop ratings/review counts shown with no reviews | High | Denormalised counters from seed data | Ratings computed from published reviews | J-10 (count goes to 1) | Pass | Fixed (data left untouched) |
+| BUG-N | Shop owners could not save profiles with `+92 3xx` numbers | Medium | Phone regex disallowed a space after the prefix | Regex relaxed | J-04 | Pass | Fixed |
+| BUG-O | Report QR code generated by a third-party service | Medium | `api.qrserver.com` URL leaked report numbers | Local `qrcode` generation | J-11 | Pass | Fixed |
+| BUG-P | Report numbers could collide | Medium | 16-bit random suffix | 32-bit hex with uniqueness check | J-09 | Pass | Fixed |
+| BUG-Q | Report mixed up colour and storage, random IMEI digits | Medium | Copy errors in report generator | Generator replaced; public page omits IMEI | J-11 | Pass | Fixed |
+| BUG-R | Gallery thumbnails not announced as buttons | Medium | `role="listitem"` on `<button>` | Proper `<ul><li><button>` | J-02 | Pass | Fixed |
+| BUG-S | Inspector checklist draft lost on refresh | Medium | Save effect ran before load (React strict mode double mount) | Save only after load | J-09 | Pass | Fixed |
+| BUG-T | Low-contrast placeholder text | Medium | `slate-400`/`slate-500` text on `slate-100` | `slate-600` | A11Y-01 | Pass | Fixed |
+| BUG-U | Account menu accessible name did not include visible name | Medium | `aria-label` overrode visible text | Name built from visible text + sr-only suffix | A11Y-01 | Pass | Fixed |
+| BUG-V | Shop name clipped under cover image | Low | Negative margin on whole header row | Negative margin on logo only | Visual review | Pass | Fixed |
+| BUG-W | Sort select stretched full width | Low | `w-full` base class beat width override | Wrapper width | Visual review | Pass | Fixed |
+| BUG-X | Android inspections impossible | High | No Android checklist rows | Insert-only script, applied to test and dev DBs | Row counts: 31 iPhone + 31 Android on dev | Pass | Fixed |
+| BUG-Y | Production build failed lint: eslint config lacked Next.js rules; unused variables | High (could not deploy) | Web app eslint config did not extend `next/core-web-vitals` | Added `apps/web/.eslintrc.json`; removed unused code; marked parameter-less GET routes dynamic so they are not frozen at build time | `next build` | Pass (79 routes) | Fixed |

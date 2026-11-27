@@ -1,32 +1,50 @@
 import type { Config } from 'tailwindcss';
+import defaultTheme from 'tailwindcss/defaultTheme';
 
 const config: Config = {
-  content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
+  content: ['./src/**/*.{ts,tsx}'],
   theme: {
+    container: { center: true, padding: { DEFAULT: '1rem', sm: '1.5rem', lg: '2rem' }, screens: { '2xl': '1200px' } },
     extend: {
+      fontFamily: {
+        sans: ['"Inter Variable"', ...defaultTheme.fontFamily.sans],
+      },
       colors: {
-        primary: '#2563eb',
-        secondary: '#1e40af',
-        accent: '#f59e0b',
-        success: '#10b981',
-        danger: '#ef4444',
-        warning: '#f97316',
-        gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
+        brand: {
+          50: '#ecfdf6',
+          100: '#d1faea',
+          200: '#a6f2d5',
+          300: '#6ce3bb',
+          400: '#31cb9b',
+          500: '#0eb082',
+          600: '#048f6b',
+          700: '#047258',
+          800: '#075b47',
+          900: '#084b3c',
+          950: '#032a22',
         },
+        ink: {
+          DEFAULT: '#0b1220',
+          muted: '#475569',
+          subtle: '#64748b',
+        },
+      },
+      fontSize: {
+        '2xs': ['0.6875rem', { lineHeight: '1rem' }],
+      },
+      borderRadius: {
+        DEFAULT: '0.5rem',
+        lg: '0.75rem',
+        xl: '1rem',
+        '2xl': '1.25rem',
+      },
+      boxShadow: {
+        card: '0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06)',
+        raised: '0 4px 12px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06)',
+        overlay: '0 20px 48px rgba(15, 23, 42, 0.18)',
+      },
+      maxWidth: {
+        content: '1200px',
       },
     },
   },

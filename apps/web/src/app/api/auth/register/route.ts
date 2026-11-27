@@ -2,39 +2,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import prisma from '@/lib/prisma';
 import { RegisterSchema } from '@/lib/validation';
-import { signJWT } from '@/lib/auth';
+import { createSession, publicUserSelect, setSessionCookie } from '@/lib/session';
+import { parseBody, serverError } from '@/lib/api';
+import { clientIp, rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-
-    // Validate input
-    const validation = RegisterSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: validation.error.errors },
-        { status: 400 }
-      );
+    const limit = rateLimit(`register:${clientIp(request)}`, 20, 60 * 60 * 1000);
+    if (!limit.ok) {
+      return NextResponse.json({ error: 'Too many sign-ups from this network. Try again later.' }, { status: 429 });
     }
 
-    const { email, password, firstName, lastName, phone, role } = validation.data;
+    const parsed = await parseBody(request, RegisterSchema);
+    if (parsed.response) return parsed.response;
+    const { email, password, firstName, lastName, phone, role } = parsed.data;
 
-    // Check if user exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
+    const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    if (existing) {
       return NextResponse.json(
-        { error: 'Email already registered' },
+        { error: 'An account with this email already exists.', fields: { email: 'This email is already registered' } },
         { status: 409 }
       );
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Create user
+    const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
       data: {
         email,
@@ -44,46 +35,18 @@ export async function POST(request: NextRequest) {
         phone,
         role,
         status: 'ACTIVE',
+        ...(role === 'CUSTOMER'
+          ? { customerProfile: { create: { displayName: `${firstName} ${lastName}` } } }
+          : { shopOwnerProfile: { create: {} } }),
       },
+      select: publicUserSelect,
     });
 
-    // Create customer profile if customer role
-    if (role === 'CUSTOMER') {
-      await prisma.customerProfile.create({
-        data: {
-          userId: user.id,
-          displayName: `${firstName} ${lastName}`,
-          city: 'Lahore', // Default, can be updated later
-        },
-      });
-    }
-
-    // Generate JWT
-    const token = await signJWT({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    });
-
-    return NextResponse.json(
-      {
-        message: 'Registration successful',
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-        },
-      },
-      { status: 201 }
-    );
+    const { token, expiresAt } = await createSession(user.id, request);
+    const response = NextResponse.json({ user }, { status: 201 });
+    setSessionCookie(response, token, expiresAt);
+    return response;
   } catch (error) {
-    console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: 'Registration failed' },
-      { status: 500 }
-    );
+    return serverError('Registration error', error, 'Registration failed. Please try again.');
   }
 }
