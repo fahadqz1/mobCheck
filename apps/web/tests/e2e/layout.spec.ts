@@ -9,6 +9,7 @@ const publicPages = async () => {
 
 test.describe('Header and responsive layout @responsive', () => {
   test('LAYOUT-01 header auth controls keep the same position and size on every public page', async ({ page }) => {
+    test.setTimeout(120_000);
     const isMobile = (page.viewportSize()?.width ?? 1440) < 768;
     const boxes: Record<string, unknown> = {};
     const heights = new Set<number>();

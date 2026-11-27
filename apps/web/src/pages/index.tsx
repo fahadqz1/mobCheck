@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
-import { ArrowRight, BadgeCheck, Banknote, Camera, CheckCircle2, Clock, FileCheck2, QrCode, Search, ShieldCheck, Sparkles, Star, TriangleAlert } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Banknote, Camera, Clock, FileCheck2, QrCode, Search, ShieldCheck, Sparkles, Star } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { getSsrUser } from '@/lib/ssr-auth';
 import { serialize } from '@/lib/serialize';
@@ -20,6 +20,7 @@ import { EmptyState } from '@/components/ui/Feedback';
 import { Stars } from '@/components/ui/Rating';
 import { FoldArt, PhoneArt, PhoneBackArt, ReportArt, ShopArt } from '@/components/media/DeviceArt';
 import { useSheen } from '@/hooks/useSheen';
+import { HeroMascot } from '@/components/home/HeroMascot';
 import { api } from '@/lib/client';
 import { formatPKR } from '@/lib/format';
 import { cn } from '@/lib/cn';
@@ -141,29 +142,7 @@ export default function Home({ listings, shops, brands, reviews, fee, checks }: 
             </div>
           </div>
 
-          {/* Liquid glass sample report over colour fields */}
-          <div className="relative min-h-[380px] overflow-hidden rounded-[32px] bg-ink p-6 sm:p-8">
-            <div aria-hidden className="absolute -left-10 top-10 h-48 w-48 rounded-full bg-lime-300/80 blur-2xl" />
-            <div aria-hidden className="absolute -right-6 bottom-0 h-56 w-56 rounded-full bg-[#9b8cf2]/80 blur-2xl" />
-            <div aria-hidden className="absolute bottom-16 left-24 h-40 w-40 rounded-full bg-brand-400/70 blur-2xl" />
-            <div aria-hidden className="absolute right-8 top-8 animate-float"><PhoneArt className="h-36 drop-shadow-2xl" /></div>
-            <div onPointerMove={sheen} className="glass liquid-sheen relative mt-24 max-w-[300px] rounded-3xl p-5 text-ink sm:mt-28">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wider text-ink/70">Sample report</p>
-                <QrCode className="h-5 w-5" aria-hidden />
-              </div>
-              <p className="mt-2 font-display text-xl font-extrabold leading-tight">iPhone 15 Pro · 256 GB</p>
-              <ul className="mt-4 space-y-2 text-sm">
-                {[['Display & touch', true], ['Battery 89% health', true], ['IMEI matches box', true], ['Back glass scuff', false]].map(([label, ok]) => (
-                  <li key={label as string} className="flex items-center gap-2">
-                    {ok ? <CheckCircle2 className="h-4 w-4 text-brand-700" aria-hidden /> : <TriangleAlert className="h-4 w-4 text-amber-600" aria-hidden />}
-                    {label}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-4 inline-flex rounded-full bg-ink px-3 py-1 text-xs font-semibold text-lime-300">Overall: Good</p>
-            </div>
-          </div>
+          <HeroMascot checks={checks} />
         </div>
       </section>
 
