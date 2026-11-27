@@ -41,7 +41,7 @@ test.describe('Authentication regression', () => {
   test('AUTH-05 logout deletes the server session and protected pages redirect', async ({ page }) => {
     await login(page, 'customer@mobcheck.pk');
     const token = (await page.context().cookies()).find((c) => c.name === 'mc_session')!.value;
-    await page.getByRole('button', { name: 'Account menu' }).click();
+    await page.getByRole('button', { name: /account menu/i }).click();
     await page.getByRole('menuitem', { name: 'Log out' }).click();
     await expect(page).toHaveURL(/\/$/);
     const hash = crypto.createHash('sha256').update(token).digest('hex');

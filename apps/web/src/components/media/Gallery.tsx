@@ -29,8 +29,8 @@ export function Gallery({ images, emptyLabel = 'No photos uploaded yet' }: { ima
 
   if (count === 0) {
     return (
-      <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-100 text-slate-500" data-testid="gallery-empty">
-        <ImageOff className="h-8 w-8" aria-hidden />
+      <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-100 text-slate-600" data-testid="gallery-empty">
+        <ImageOff className="h-8 w-8 text-slate-400" aria-hidden />
         <p className="text-sm">{emptyLabel}</p>
       </div>
     );

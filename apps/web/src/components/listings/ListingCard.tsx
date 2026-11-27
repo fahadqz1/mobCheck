@@ -16,9 +16,9 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
         {listing.photoUrl ? (
           <Image src={listing.photoUrl} alt={listing.title} fill sizes="(min-width: 1024px) 280px, (min-width: 640px) 45vw, 100vw" className="object-cover" loading="lazy" />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-1.5 text-slate-400">
-            <Smartphone className="h-8 w-8" aria-hidden />
-            <span className="text-xs">No photos yet</span>
+          <div className="flex h-full flex-col items-center justify-center gap-1.5">
+            <Smartphone className="h-8 w-8 text-slate-400" aria-hidden />
+            <span className="text-xs text-slate-600">No photos yet</span>
           </div>
         )}
       </div>

@@ -10,7 +10,8 @@ export function Dropdown({
   menuClassName = 'w-60',
 }: {
   trigger: React.ReactNode;
-  label: string;
+  // Omit when the trigger has visible text; it then names the button itself.
+  label?: string;
   children: (close: () => void) => React.ReactNode;
   align?: 'left' | 'right';
   triggerClassName?: string;

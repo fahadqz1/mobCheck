@@ -69,7 +69,6 @@ export function Header() {
               )}
               <div className="hidden md:block">
                 <Dropdown
-                  label="Account menu"
                   triggerClassName="flex h-10 items-center gap-2 rounded-lg pl-1 pr-2 hover:bg-slate-100"
                   trigger={
                     <>
@@ -77,6 +76,7 @@ export function Header() {
                       <span className="max-w-[140px] truncate text-sm font-medium text-ink" data-testid="header-user-name">
                         {user.firstName || user.email}
                       </span>
+                      <span className="sr-only"> account menu</span>
                       <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden />
                     </>
                   }
