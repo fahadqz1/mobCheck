@@ -131,7 +131,7 @@ export default function Home({ listings, shops, fee }: Props) {
               <p className="mt-1 max-w-xl text-slate-300">Earn from every inspection you perform and reach buyers who are ready to purchase. Free for the first 30 days.</p>
             </div>
           </div>
-          <LinkButton href="/auth/register?role=SHOP_OWNER" variant="primary" size="lg" className="bg-white text-ink hover:bg-slate-100">List your shop</LinkButton>
+          <LinkButton href="/auth/register?role=SHOP_OWNER" variant="outline" size="lg" className="border-white">List your shop</LinkButton>
         </div>
       </section>
     </SiteLayout>
