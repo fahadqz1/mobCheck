@@ -55,6 +55,7 @@ apps/web/uploads-test/
 apps/web/test-results/
 apps/web/playwright-report/
 apps/web/.next-test/
+apps/web/.next-build/
 
 # Package manager lock files (optional - for reproducibility)
 package-lock.json

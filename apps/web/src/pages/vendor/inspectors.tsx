@@ -96,7 +96,8 @@ export default function VendorInspectors({ hasShop, inspectors }: Props) {
     if (!editing) return;
     setSaving(true);
     try {
-      const { id, name, email, completed, ...rest } = editing;
+      const { id, status, startTime, endTime } = editing;
+      const rest = { status, startTime, endTime, ...Object.fromEntries(DAYS.map(([k]) => [k, editing[k]])) };
       await api(`/api/vendor/inspectors/${id}`, { method: 'PATCH', body: { ...rest, startTime: rest.startTime || undefined, endTime: rest.endTime || undefined } });
       toast('success', 'Inspector updated');
       setEditing(null);
