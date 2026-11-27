@@ -51,6 +51,7 @@ temp/
 *.sqlite3
 .pgdata/
 apps/web/uploads/
+apps/web/uploads-test/
 apps/web/test-results/
 apps/web/playwright-report/
 apps/web/.next-test/

@@ -80,6 +80,7 @@ export function InspectionWorkspace({ booking }: { booking: BookingView }) {
   const [photoError, setPhotoError] = useState('');
   const fileInput = useRef<HTMLInputElement>(null);
 
+  const [draftLoaded, setDraftLoaded] = useState(false);
   useEffect(() => {
     try {
       const saved = localStorage.getItem(draftKey);
@@ -87,14 +88,17 @@ export function InspectionWorkspace({ booking }: { booking: BookingView }) {
     } catch {
       // draft unavailable
     }
+    setDraftLoaded(true);
   }, [draftKey]);
+  // Never write before the saved draft is read, or an empty draft would overwrite it.
   useEffect(() => {
+    if (!draftLoaded) return;
     try {
       localStorage.setItem(draftKey, JSON.stringify(draft));
     } catch {
       // storage unavailable
     }
-  }, [draft, draftKey]);
+  }, [draft, draftKey, draftLoaded]);
 
   const categories = useMemo(() => {
     const map = new Map<string, BookingView['checklist']>();

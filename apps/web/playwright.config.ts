@@ -9,7 +9,8 @@ export default defineConfig({
   retries: 0,
   reporter: [['list'], ['json', { outputFile: 'test-results/results.json' }]],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    // Port 3100 is the test server backed by the mobcheck_test database.
+    baseURL: process.env.BASE_URL || 'http://localhost:3100',
     channel: 'chrome',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',

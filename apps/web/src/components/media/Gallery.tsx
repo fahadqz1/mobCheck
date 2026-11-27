@@ -61,21 +61,21 @@ export function Gallery({ images, emptyLabel = 'No photos uploaded yet' }: { ima
         )}
       </div>
       {count > 1 && (
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1" role="list" aria-label="Photo thumbnails">
+        <ul className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Photo thumbnails">
           {images.map((img, i) => (
-            <button
-              key={img.id}
-              type="button"
-              role="listitem"
-              onClick={() => setIndex(i)}
-              aria-label={`Show photo ${i + 1}`}
-              aria-current={i === index}
-              className={cn('relative aspect-square w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-slate-100 sm:w-20', i === index ? 'border-brand-600' : 'border-transparent opacity-70 hover:opacity-100')}
-            >
-              <Image src={img.url} alt="" fill sizes="80px" className="object-cover" loading="lazy" />
-            </button>
+            <li key={img.id} className="shrink-0">
+              <button
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-label={`Show photo ${i + 1}`}
+                aria-current={i === index}
+                className={cn('relative block aspect-square w-16 overflow-hidden rounded-lg border-2 bg-slate-100 sm:w-20', i === index ? 'border-brand-600' : 'border-transparent opacity-70 hover:opacity-100')}
+              >
+                <Image src={img.url} alt="" fill sizes="80px" className="object-cover" loading="lazy" />
+              </button>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
       {fullscreen &&
         createPortal(
