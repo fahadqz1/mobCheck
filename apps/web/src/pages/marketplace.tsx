@@ -131,8 +131,8 @@ export default function Marketplace({ listings, total, page, pages, brands }: Pr
             <Button variant="outline" size="sm" className="lg:hidden" onClick={() => setFiltersOpen((v) => !v)} aria-expanded={filtersOpen}>
               <SlidersHorizontal className="h-4 w-4" aria-hidden />Filters{active.length ? ` (${active.length})` : ''}
             </Button>
-            <div className="ml-auto">
-              <Select aria-label="Sort by" value={query.sort || ''} onChange={(e) => apply({ sort: e.target.value || undefined })} className="h-9 w-44">
+            <div className="ml-auto w-44">
+              <Select aria-label="Sort by" value={query.sort || ''} onChange={(e) => apply({ sort: e.target.value || undefined })} className="h-9">
                 <option value="">Newest first</option>
                 <option value="price_asc">Price: low to high</option>
                 <option value="price_desc">Price: high to low</option>

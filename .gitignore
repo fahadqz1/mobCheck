@@ -71,3 +71,4 @@ credentials/
 .vercel/
 .netlify/
 .claude/
+*.tsbuildinfo

@@ -10,7 +10,7 @@ export const passwordRule = z
 export const pkPhone = z
   .string()
   .trim()
-  .regex(/^(\+92|0)3\d{2}[\s-]?\d{7}$/, 'Enter a Pakistani mobile number, e.g. 0300 1234567');
+  .regex(/^(\+92|0)[\s-]?3\d{2}[\s-]?\d{7}$/,'Enter a Pakistani mobile number, e.g. 0300 1234567');
 
 // Inspector accounts are created by shop owners, never self-registered.
 export const RegisterSchema = z.object({
@@ -43,19 +43,6 @@ export const ChangePasswordSchema = z.object({
 export const ForgotPasswordSchema = z.object({ email });
 export const ResetPasswordSchema = z.object({ token: z.string().min(20), password: passwordRule });
 
-// Shop Validation
-export const ShopRegistrationSchema = z.object({
-  name: z.string().min(3, 'Shop name required'),
-  email: z.string().email('Invalid email'),
-  phone: z.string().min(10, 'Valid phone required'),
-  whatsapp: z.string().optional(),
-  addressLine1: z.string().min(5, 'Address required'),
-  city: z.string().min(2, 'City required'),
-  area: z.string().min(2, 'Area required'),
-  openingHour: z.string().optional(),
-  closingHour: z.string().optional(),
-});
-
 const intInRange = (min: number, max: number, label: string, required: boolean) =>
   z
     .union([z.number(), z.string()])
@@ -72,6 +59,75 @@ const intInRange = (min: number, max: number, label: string, required: boolean) 
       return n;
     });
 const optionalInt = (min: number, max: number, label: string) => intInRange(min, max, label, false);
+
+const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM, e.g. 10:00');
+const optionalCoord = (min: number, max: number) =>
+  z
+    .union([z.number(), z.string()])
+    .optional()
+    .transform((v, ctx): number | null => {
+      if (v === undefined || v === '') return null;
+      const n = Number(v);
+      if (Number.isNaN(n) || n < min || n > max) ctx.addIssue({ code: 'custom', message: 'Enter a valid coordinate' });
+      return n;
+    });
+
+export const ShopSchema = z.object({
+  name: z.string().trim().min(3, 'Shop name must be at least 3 characters').max(80),
+  description: z.string().trim().max(1500).optional(),
+  email: z.string().trim().toLowerCase().email('Enter a valid email address'),
+  phone: pkPhone,
+  whatsapp: pkPhone.optional().or(z.literal('').transform(() => undefined)),
+  addressLine1: z.string().trim().min(5, 'Enter the shop address').max(150),
+  addressLine2: z.string().trim().max(150).optional(),
+  city: z.string().trim().min(2, 'Choose a city'),
+  area: z.string().trim().min(2, 'Enter the market or area').max(80),
+  openingHour: hhmm,
+  closingHour: hhmm,
+  weeklyHolidays: z.array(z.enum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])).default([]),
+  latitude: optionalCoord(-90, 90),
+  longitude: optionalCoord(-180, 180),
+});
+
+export const ServiceSchema = z.object({
+  name: z.string().trim().min(3, 'Service name is required').max(80),
+  description: z.string().trim().max(300).optional(),
+  pricePkr: intInRange(0, 500_000, 'Price', true).transform((v) => v as number),
+  status: z.enum(['ACTIVE', 'INACTIVE']).default('ACTIVE'),
+});
+
+const availability = {
+  availableMonday: z.boolean().default(true),
+  availableTuesday: z.boolean().default(true),
+  availableWednesday: z.boolean().default(true),
+  availableThursday: z.boolean().default(true),
+  availableFriday: z.boolean().default(true),
+  availableSaturday: z.boolean().default(true),
+  availableSunday: z.boolean().default(false),
+  startTime: hhmm.optional(),
+  endTime: hhmm.optional(),
+};
+
+export const InspectorCreateSchema = z.object({
+  firstName: z.string().trim().min(2, 'First name is required').max(50),
+  lastName: z.string().trim().min(2, 'Last name is required').max(50),
+  email,
+  phone: pkPhone.optional().or(z.literal('').transform(() => undefined)),
+  ...availability,
+});
+
+export const InspectorUpdateSchema = z.object({
+  status: z.enum(['ACTIVE', 'INACTIVE']),
+  ...availability,
+});
+
+export const ComplaintSchema = z.object({
+  shopId: z.string().min(1),
+  bookingId: z.string().optional(),
+  category: z.enum(['FRAUDULENT', 'MISLEADING_INFO', 'POOR_QUALITY', 'INCORRECT_REPORT', 'PAYMENT_ISSUE', 'FAKE_REVIEWS', 'HARASSMENT', 'CANCELLATION', 'OTHER'], { errorMap: () => ({ message: 'Choose a category' }) }),
+  description: z.string().trim().min(20, 'Describe what happened in at least 20 characters').max(2000),
+});
+
 
 export const ListingSchema = z.object({
   brandId: z.string().min(1, 'Choose a brand'),
@@ -130,7 +186,6 @@ export const ReviewSchema = z.object({
 
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
-export type ShopRegistrationInput = z.infer<typeof ShopRegistrationSchema>;
 export type ListingInput = z.infer<typeof ListingSchema>;
 export type InspectionBookingInput = z.infer<typeof InspectionBookingSchema>;
 export type ReviewInput = z.infer<typeof ReviewSchema>;

@@ -11,6 +11,7 @@ import { LinkButton } from '@/components/ui/Button';
 import { BookingRow, BookingSummary } from '@/components/bookings/BookingRow';
 import { formatPKR, SHOP_STATUS } from '@/lib/format';
 import { bookingListInclude } from '@/lib/queries';
+import { liveRatings } from '@/lib/shop';
 
 type Props = {
   role: string;
@@ -45,7 +46,7 @@ export const getServerSideProps: GetServerSideProps = (ctx) =>
           prisma.inspectionBooking.count({ where: { shopId: shop.id, status: 'COMPLETED' } }),
           prisma.inspectionBooking.findMany({ where: { shopId: shop.id, status: { not: 'AWAITING_PAYMENT' } }, include: bookingListInclude, orderBy: { createdAt: 'desc' }, take: 6 }),
         ]);
-        data = { shop, actionNeeded, active, completed, recent };
+        data = { shop, actionNeeded, active, completed, recent, rating: (await liveRatings([shop.id]))(shop.id) };
       } else {
         data = { shop: null };
       }
@@ -176,7 +177,7 @@ function VendorOverview({ d }: { d: any }) {
         <StatCard label="Needs your action" value={d.actionNeeded} icon={CalendarCheck} hint="Accept bookings or assign inspectors" />
         <StatCard label="In progress" value={d.active} icon={ClipboardCheck} />
         <StatCard label="Completed" value={d.completed} icon={ShieldCheck} />
-        <StatCard label="Rating" value={d.shop.averageRating ? `${Number(d.shop.averageRating).toFixed(1)} / 5` : '—'} icon={Star} hint={`${d.shop.totalReviews} verified reviews`} />
+        <StatCard label="Rating" value={d.rating.averageRating ? `${Number(d.rating.averageRating).toFixed(1)} / 5` : '—'} icon={Star} hint={`${d.rating.totalReviews} verified reviews`} />
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-600">
         <Badge tone={status.tone}>{status.label}</Badge>
