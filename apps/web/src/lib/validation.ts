@@ -161,15 +161,40 @@ export const ListingReportSchema = z.object({
   details: z.string().trim().max(1000).optional(),
 });
 
-// Inspection Booking Validation
-export const InspectionBookingSchema = z.object({
-  brandId: z.string().min(1, 'Brand required'),
-  modelId: z.string().min(1, 'Model required'),
-  deviceType: z.enum(['IPHONE', 'ANDROID']),
-  shopId: z.string().min(1, 'Shop required'),
-  inspectionDate: z.string().datetime('Invalid date'),
-  locationLatitude: z.number().optional(),
-  locationLongitude: z.number().optional(),
+export const BookingSchema = z.object({
+  shopId: z.string().min(1, 'Choose a shop'),
+  brandId: z.string().min(1, 'Choose a brand'),
+  modelId: z.string().min(1, 'Choose a model'),
+  deviceStorageGb: optionalInt(8, 2048, 'Storage'),
+  deviceColor: z.string().trim().max(40).optional(),
+  ptaStatus: z.enum(['APPROVED', 'NON_PTA', 'UNKNOWN']).default('UNKNOWN'),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date'),
+  time: hhmm,
+});
+
+export const ShopBookingActionSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('accept') }),
+  z.object({ action: z.literal('reject'), reason: z.string().trim().min(5, 'Give the customer a reason').max(300) }),
+  z.object({ action: z.literal('assign'), inspectorId: z.string().min(1, 'Choose an inspector') }),
+]);
+
+export const InspectionResultsSchema = z.object({
+  results: z
+    .array(
+      z.object({
+        checklistId: z.string().min(1),
+        result: z.enum(['PASS', 'FAIL', 'NEEDS_ATTENTION', 'NOT_TESTED', 'NOT_VERIFIABLE', 'NOT_APPLICABLE']),
+        inspectorNotes: z.string().trim().max(500).optional(),
+      })
+    )
+    .min(1, 'Complete the checklist'),
+});
+
+export const DisputeSchema = z.object({ reason: z.string().trim().min(20, 'Explain the problem in at least 20 characters').max(1000) });
+
+export const AdminBookingActionSchema = z.object({
+  action: z.enum(['release', 'refund', 'mark_refunded']),
+  note: z.string().trim().max(500).optional(),
 });
 
 // Review Validation
@@ -187,5 +212,4 @@ export const ReviewSchema = z.object({
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type ListingInput = z.infer<typeof ListingSchema>;
-export type InspectionBookingInput = z.infer<typeof InspectionBookingSchema>;
 export type ReviewInput = z.infer<typeof ReviewSchema>;
