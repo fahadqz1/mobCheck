@@ -21,8 +21,15 @@ type Props = {
 
 const OPEN_STATUSES = ['AWAITING_PAYMENT', 'PAYMENT_CONFIRMED', 'AWAITING_SHOP_CONFIRMATION', 'BOOKING_ACCEPTED', 'INSPECTOR_ASSIGNED', 'INSPECTION_IN_PROGRESS', 'INSPECTION_SUBMITTED', 'REPORT_DELIVERED', 'DISPUTE_RAISED'] as const;
 
-export const getServerSideProps: GetServerSideProps = (ctx) =>
-  requirePageAuth(ctx, undefined, async (user) => {
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const result = await requirePageAuth(ctx, undefined, async (user) => loadDashboard(user));
+  // Support staff only work the complaints queue.
+  if ('props' in result && (result.props as any).role === 'SUPPORT') return { redirect: { destination: '/admin/complaints', permanent: false } };
+  return result;
+};
+
+async function loadDashboard(user: import('@/lib/session').SessionUser) {
+  {
     let data: any = {};
     if (user.role === 'SUPER_ADMIN' || user.role === 'OPS_ADMIN') {
       const [customers, shops, pendingShops, listings, bookings, disputes, complaints, revenue] = await Promise.all([
@@ -71,7 +78,8 @@ export const getServerSideProps: GetServerSideProps = (ctx) =>
       data = { open, completed, listings, inquiries, recent };
     }
     return { role: user.role, firstName: user.firstName || '', data };
-  });
+  }
+}
 
 export default function Dashboard({ role, firstName, data }: Props) {
   const router = useRouter();

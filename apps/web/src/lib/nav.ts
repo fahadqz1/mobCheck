@@ -37,6 +37,11 @@ export function dashboardNav(role: string): NavItem[] {
         { href: '/inspector', label: 'My inspections', icon: ClipboardCheck },
         profile,
       ];
+    case 'SUPPORT':
+      return [
+        { href: '/admin/complaints', label: 'Complaints', icon: MessageSquareWarning },
+        profile,
+      ];
     case 'SUPER_ADMIN':
     case 'OPS_ADMIN':
       return [

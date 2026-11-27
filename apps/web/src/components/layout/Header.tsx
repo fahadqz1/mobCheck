@@ -9,6 +9,7 @@ import { LinkButton, Button } from '@/components/ui/Button';
 import { Dropdown, menuItemClass } from '@/components/ui/Dropdown';
 import { Avatar } from '@/components/ui/Avatar';
 import { Logo } from './Logo';
+import { NotificationBell } from './NotificationBell';
 
 const primaryNav = [
   { href: '/marketplace', label: 'Buy a phone' },
@@ -59,6 +60,7 @@ export function Header() {
             <div className="hidden h-10 w-[196px] animate-pulse rounded-lg bg-slate-100 md:block" aria-hidden />
           ) : user ? (
             <>
+              <NotificationBell />
               {canSell(user.role) && (
                 <LinkButton href="/listings/new" variant="outline" className="hidden lg:inline-flex">
                   <Plus className="h-4 w-4" aria-hidden />

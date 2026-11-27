@@ -7,12 +7,14 @@ export function Dropdown({
   children,
   align = 'right',
   triggerClassName,
+  menuClassName = 'w-60',
 }: {
   trigger: React.ReactNode;
   label: string;
   children: (close: () => void) => React.ReactNode;
   align?: 'left' | 'right';
   triggerClassName?: string;
+  menuClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -53,7 +55,8 @@ export function Dropdown({
           id={menuId}
           role="menu"
           className={cn(
-            'absolute top-full z-50 mt-2 w-60 overflow-hidden rounded-xl border border-slate-200 bg-white py-1.5 shadow-raised',
+            'absolute top-full z-50 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white py-1.5 shadow-raised',
+            menuClassName,
             align === 'right' ? 'right-0' : 'left-0'
           )}
         >

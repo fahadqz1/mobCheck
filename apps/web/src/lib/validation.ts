@@ -192,6 +192,22 @@ export const InspectionResultsSchema = z.object({
 
 export const DisputeSchema = z.object({ reason: z.string().trim().min(20, 'Explain the problem in at least 20 characters').max(1000) });
 
+export const AdminShopActionSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('verify') }),
+  z.object({ action: z.literal('reject'), reason: z.string().trim().min(5, 'Give a reason').max(500) }),
+  z.object({ action: z.literal('suspend'), reason: z.string().trim().min(5, 'Give a reason').max(500), banType: z.enum(['TEMPORARY_SUSPENSION', 'PERMANENT_BAN']), days: z.number().int().min(1).max(365).optional() }),
+  z.object({ action: z.literal('reinstate') }),
+]);
+
+export const AdminComplaintSchema = z.object({
+  status: z.enum(['UNDER_REVIEW', 'RESOLVED', 'DISMISSED']),
+  resolution: z.string().trim().max(1000).optional(),
+  actionTaken: z.enum(['NONE', 'WARNING', 'TEMPORARY_SUSPENSION', 'PERMANENT_BAN']).default('NONE'),
+});
+
+export const AdminUserSchema = z.object({ status: z.enum(['ACTIVE', 'SUSPENDED']) });
+export const AdminListingReportSchema = z.object({ status: z.enum(['ACTIONED', 'DISMISSED']), removeListing: z.boolean().default(false) });
+
 export const AdminBookingActionSchema = z.object({
   action: z.enum(['release', 'refund', 'mark_refunded']),
   note: z.string().trim().max(500).optional(),
