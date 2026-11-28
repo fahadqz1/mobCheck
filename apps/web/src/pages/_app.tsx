@@ -5,6 +5,7 @@ import '@fontsource-variable/bricolage-grotesque';
 import '../styles/globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { ToastProvider } from '@/components/ui/Toast';
+import { HelpWidget } from '@/components/help/HelpWidget';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -15,6 +16,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <title>MobCheck · Check before you buy</title>
         </Head>
         <Component {...pageProps} />
+        <HelpWidget />
       </ToastProvider>
     </AuthProvider>
   );
