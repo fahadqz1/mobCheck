@@ -47,6 +47,9 @@ model User {
   listingReports        ListingReport[] @relation("ListingReporter")
   reviewedListingReports ListingReport[] @relation("ListingReportReviewer")
   notifications         Notification[]
+  conversationsStarted  Conversation[] @relation("ConversationStarter")
+  conversationsReceived Conversation[] @relation("ConversationRecipient")
+  messagesSent          Message[]
   refundsRequested      Refund[] @relation("RefundRequested")
   refundsApproved       Refund[] @relation("RefundApproved")
   payments              Payment[]
@@ -251,6 +254,7 @@ model PhoneListing {
   photos                ListingPhoto[]
   inquiries             ListingInquiry[]
   reports               ListingReport[]
+  conversations         Conversation[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -367,6 +371,7 @@ model Shop {
   reviews               Review[]
   complaints            Complaint[]
   bans                  ShopBan[]
+  conversations         Conversation[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -534,6 +539,7 @@ model InspectionBooking {
   complaints            Complaint[]
   refunds               Refund[]
   payoutLedger          PayoutLedger?
+  conversations         Conversation[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -843,6 +849,58 @@ model ListingReport {
   createdAt             DateTime @default(now())
 
   @@unique([listingId, reporterId])
+  @@index([status, createdAt])
+}
+
+// In-app conversations. Contact details (phone numbers, emails) are blocked by the API before a message is stored as DELIVERED.
+model Conversation {
+  id                    String   @id @default(cuid())
+  kind                  ConversationKind
+  // One conversation per context per starter, e.g. "LISTING:<listingId>:<starterId>".
+  contextKey            String   @unique
+
+  listingId             String?
+  listing               PhoneListing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  shopId                String?
+  shop                  Shop?    @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  bookingId             String?
+  booking               InspectionBooking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  starterId             String
+  starter               User     @relation("ConversationStarter", fields: [starterId], references: [id], onDelete: Cascade)
+  recipientId           String
+  recipient             User     @relation("ConversationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  lastMessageAt         DateTime @default(now())
+  starterReadAt         DateTime?
+  recipientReadAt       DateTime?
+
+  messages              Message[]
+
+  createdAt             DateTime @default(now())
+
+  @@index([starterId, lastMessageAt])
+  @@index([recipientId, lastMessageAt])
+}
+
+model Message {
+  id                    String   @id @default(cuid())
+  conversationId        String
+  conversation          Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId              String
+  sender                User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  body                  String?
+  imageKey              String?
+
+  status                MessageStatus @default(DELIVERED)
+  moderationNote        String?
+  reviewedById          String?
+  reviewedAt            DateTime?
+
+  createdAt             DateTime @default(now())
+
+  @@index([conversationId, createdAt])
   @@index([status, createdAt])
 }
 
@@ -1204,6 +1262,19 @@ enum ListingReportReason {
   ALREADY_SOLD
   OFFENSIVE
   OTHER
+}
+
+enum ConversationKind {
+  LISTING
+  SHOP
+  BOOKING
+}
+
+enum MessageStatus {
+  DELIVERED
+  BLOCKED
+  PENDING_REVIEW
+  REJECTED
 }
 
 enum ListingReportStatus {
