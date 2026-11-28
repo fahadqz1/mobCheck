@@ -12,11 +12,15 @@ import {
   ShieldCheck,
   MessageSquareWarning,
   Receipt,
+  MessagesSquare,
+  ShieldAlert,
 } from 'lucide-react';
 
 export type NavItem = { href: string; label: string; icon: React.ComponentType<{ className?: string }> };
 
 const profile: NavItem = { href: '/dashboard/profile', label: 'Profile & settings', icon: UserRound };
+const messages: NavItem = { href: '/messages', label: 'Messages', icon: MessagesSquare };
+const moderation: NavItem = { href: '/admin/moderation', label: 'Chat moderation', icon: ShieldAlert };
 
 export function dashboardNav(role: string): NavItem[] {
   switch (role) {
@@ -24,6 +28,7 @@ export function dashboardNav(role: string): NavItem[] {
       return [
         { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
         { href: '/vendor/bookings', label: 'Bookings', icon: CalendarCheck },
+        messages,
         { href: '/vendor/shop', label: 'Shop profile', icon: Store },
         { href: '/vendor/services', label: 'Services & pricing', icon: Wrench },
         { href: '/vendor/inspectors', label: 'Inspectors', icon: Users },
@@ -40,6 +45,7 @@ export function dashboardNav(role: string): NavItem[] {
     case 'SUPPORT':
       return [
         { href: '/admin/complaints', label: 'Complaints', icon: MessageSquareWarning },
+        moderation,
         profile,
       ];
     case 'SUPER_ADMIN':
@@ -52,6 +58,7 @@ export function dashboardNav(role: string): NavItem[] {
         { href: '/admin/complaints', label: 'Complaints', icon: MessageSquareWarning },
         { href: '/admin/users', label: 'Users', icon: Users },
         { href: '/admin/payments', label: 'Payments', icon: Receipt },
+        moderation,
         profile,
       ];
     default:
@@ -59,6 +66,8 @@ export function dashboardNav(role: string): NavItem[] {
         { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
         { href: '/dashboard/bookings', label: 'My inspections', icon: CalendarCheck },
         { href: '/dashboard/listings', label: 'My listings', icon: Smartphone },
+        messages,
+        { href: '/saved', label: 'Saved phones', icon: Star },
         profile,
       ];
   }

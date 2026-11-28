@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { GetServerSideProps } from 'next';
-import { BadgeCheck, CalendarDays, ClipboardCheck, Clock, Flag, Mail, MapPin, MessageCircle, Phone, ShieldAlert, Users, Wrench } from 'lucide-react';
+import { BadgeCheck, CalendarDays, ClipboardCheck, Clock, Flag, MapPin, ShieldAlert, Users, Wrench } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { getSsrUser } from '@/lib/ssr-auth';
 import { serialize } from '@/lib/serialize';
@@ -14,7 +14,8 @@ import { Alert, Badge, EmptyState } from '@/components/ui/Feedback';
 import { LinkButton } from '@/components/ui/Button';
 import { Rating, Stars } from '@/components/ui/Rating';
 import { ComplaintModal } from '@/components/shops/ComplaintModal';
-import { fileUrl, formatDate, formatPKR, SHOP_STATUS, whatsappLink } from '@/lib/format';
+import { ChatButton } from '@/components/chat/ChatButton';
+import { fileUrl, formatDate, formatPKR, SHOP_STATUS } from '@/lib/format';
 import { useAuth } from '@/context/AuthContext';
 
 type Review = { id: string; overallRating: number; reviewText: string | null; wouldRecommend: boolean | null; createdAt: string; author: string; device: string };
@@ -31,9 +32,6 @@ type Shop = {
   addressLine2: string | null;
   latitude: number | null;
   longitude: number | null;
-  phone: string;
-  whatsapp: string | null;
-  email: string;
   openingHour: string | null;
   closingHour: string | null;
   weeklyHolidays: string[];
@@ -94,9 +92,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     addressLine2: s.addressLine2,
     latitude: s.latitude ? Number(s.latitude) : null,
     longitude: s.longitude ? Number(s.longitude) : null,
-    phone: s.phone,
-    whatsapp: s.whatsapp,
-    email: s.email,
     openingHour: s.openingHour,
     closingHour: s.closingHour,
     weeklyHolidays: s.weeklyHolidays,
@@ -167,11 +162,7 @@ export default function ShopProfile({ shop, reviews, breakdown, fee, isOwner }: 
               <LinkButton href="/vendor/shop">Edit shop profile</LinkButton>
             ) : (
               <>
-                {shop.whatsapp && (
-                  <a href={whatsappLink(shop.whatsapp, `Hi ${shop.name}, I found you on MobCheck and want to book an inspection.`)} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#157a3f] px-4 text-sm font-medium text-white hover:bg-[#106533]">
-                    <MessageCircle className="h-4 w-4" aria-hidden />WhatsApp
-                  </a>
-                )}
+                {verified && <ChatButton kind="SHOP" refId={shop.id} label="Message shop" variant="secondary" size="md" />}
                 {canBook && (
                   <LinkButton href={user ? bookHref : `/auth/login?next=${encodeURIComponent(bookHref)}`}><ClipboardCheck className="h-4 w-4" aria-hidden />Book inspection</LinkButton>
                 )}
@@ -265,7 +256,7 @@ export default function ShopProfile({ shop, reviews, breakdown, fee, isOwner }: 
 
           <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
             <Card>
-              <CardHeader title="Visit or contact" />
+              <CardHeader title="Visit the shop" />
               <CardBody className="space-y-4 text-sm">
                 <div className="flex gap-3">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
@@ -283,8 +274,7 @@ export default function ShopProfile({ shop, reviews, breakdown, fee, isOwner }: 
                     <p className="text-slate-600">{shop.weeklyHolidays.length ? `Closed ${shop.weeklyHolidays.join(', ')}` : 'Open every day'}</p>
                   </div>
                 </div>
-                <a href={`tel:${shop.phone}`} className="flex gap-3 hover:text-brand-800"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />{shop.phone}</a>
-                <a href={`mailto:${shop.email}`} className="flex gap-3 break-all hover:text-brand-800"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />{shop.email}</a>
+                <p className="flex gap-3 text-slate-600"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />To keep everyone safe, shop phone numbers and emails stay private. Use Message shop to ask anything.</p>
               </CardBody>
             </Card>
 

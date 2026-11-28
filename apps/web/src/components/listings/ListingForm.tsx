@@ -64,13 +64,11 @@ export function ListingFields({
   onChange,
   errors,
   brands,
-  hasPhone,
 }: {
   values: ListingFormValues;
   onChange: (v: ListingFormValues) => void;
   errors: Record<string, string>;
   brands: BrandOption[];
-  hasPhone: boolean;
 }) {
   const models = useMemo(() => brands.find((b) => b.id === values.brandId)?.models || [], [brands, values.brandId]);
   const set = (k: keyof ListingFormValues) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -161,14 +159,7 @@ export function ListingFields({
           </Field>
           <Field label="Area" error={errors.locationArea} required>{(p) => <Input {...p} value={values.locationArea} onChange={set('locationArea')} placeholder="e.g. Gulberg III" />}</Field>
         </div>
-        <Field label="How should buyers contact you?" error={errors.sellerContactPreference} hint={hasPhone ? undefined : 'Add a mobile number in your profile to allow WhatsApp.'}>
-          {(p) => (
-            <Select {...p} value={values.sellerContactPreference} onChange={set('sellerContactPreference')}>
-              <option value="PLATFORM">Messages on MobCheck only</option>
-              <option value="WHATSAPP" disabled={!hasPhone}>MobCheck messages and WhatsApp</option>
-            </Select>
-          )}
-        </Field>
+        <p className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">Buyers contact you through MobCheck Messages. Your phone number and email stay private.</p>
       </section>
     </div>
   );

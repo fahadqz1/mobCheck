@@ -12,7 +12,7 @@ async function buildView(id: string, party: Exclude<Party, null>) {
     include: {
       brand: { select: { name: true } },
       model: { select: { name: true } },
-      shop: { select: { id: true, name: true, slug: true, addressLine1: true, area: true, city: true, phone: true, whatsapp: true } },
+      shop: { select: { id: true, name: true, slug: true, addressLine1: true, area: true, city: true } },
       customer: { select: { firstName: true, lastName: true, email: true, phone: true } },
       inspector: { select: { id: true, user: { select: { firstName: true, lastName: true } } } },
       payment: { select: { status: true, amountPkr: true, gatewayTransactionId: true, processedAt: true } },
@@ -24,7 +24,6 @@ async function buildView(id: string, party: Exclude<Party, null>) {
       payoutLedger: party === 'admin' || party === 'shop' ? { select: { shopPayoutPkr: true, mobcheckMarginPkr: true, gatewayFeePkr: true, payoutStatus: true, payoutEligible: true, disputeActive: true } } : false,
     },
   });
-  const showCustomerContact = party !== 'customer' && !['AWAITING_PAYMENT', 'CANCELLED'].includes(b.status);
   const reportVisible = !!b.inspectionReport;
 
   const checklist =
@@ -46,7 +45,8 @@ async function buildView(id: string, party: Exclude<Party, null>) {
     device: { brand: b.brand.name, model: b.model.name, storageGb: b.deviceStorageGb, color: b.deviceColor, pta: b.ptaStatus },
     fee: Number(b.inspectionFeePkr),
     shop: b.shop,
-    customer: showCustomerContact || party === 'admin' ? b.customer : { firstName: b.customer.firstName, lastName: b.customer.lastName, email: null, phone: null },
+    // Contact details are shared with MobCheck staff only; customers and shops talk through in-app chat.
+    customer: party === 'admin' ? b.customer : { firstName: b.customer.firstName, lastName: b.customer.lastName, email: null, phone: null },
     inspectorName: b.inspector ? [b.inspector.user.firstName, b.inspector.user.lastName].filter(Boolean).join(' ') : null,
     inspectorId: b.inspector?.id ?? null,
     payment: b.payment && { status: b.payment.status, amount: Number(b.payment.amountPkr), transactionId: b.payment.gatewayTransactionId, paidAt: b.payment.processedAt?.toISOString() ?? null },

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
-import { ExternalLink, Mail, Phone } from 'lucide-react';
+import { ExternalLink, MessagesSquare } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { requirePageAuth } from '@/lib/ssr-auth';
 import { loadBrandOptions } from '@/lib/brands';
@@ -17,7 +17,7 @@ import { api, ApiError } from '@/lib/client';
 import { fileUrl, formatDate, fullName, listingRef } from '@/lib/format';
 import type { ClientUser } from '@/context/AuthContext';
 
-type Inquiry = { id: string; message: string | null; createdAt: string; customer: { firstName: string | null; lastName: string | null; email: string; phone: string | null } };
+type Inquiry = { id: string; message: string | null; createdAt: string; customer: { firstName: string | null; lastName: string | null } };
 type Props = {
   user: ClientUser;
   brands: BrandOption[];
@@ -30,7 +30,7 @@ export const getServerSideProps: GetServerSideProps = (ctx) =>
       where: { id: String(ctx.params?.id) },
       include: {
         photos: { orderBy: { uploadSequence: 'asc' } },
-        inquiries: { orderBy: { createdAt: 'desc' }, include: { customer: { select: { firstName: true, lastName: true, email: true, phone: true } } } },
+        inquiries: { orderBy: { createdAt: 'desc' }, include: { customer: { select: { firstName: true, lastName: true } } } },
       },
     });
     if (!l || l.userId !== user.id) return { notFound: true };
@@ -68,7 +68,7 @@ export const getServerSideProps: GetServerSideProps = (ctx) =>
     };
   });
 
-export default function ManageListing({ user, brands, listing }: Props) {
+export default function ManageListing({ brands, listing }: Props) {
   const router = useRouter();
   const toast = useToast();
   const [values, setValues] = useState(listing.values);
@@ -179,7 +179,7 @@ export default function ManageListing({ user, brands, listing }: Props) {
             <Card as="section">
               <CardHeader title="Details" />
               <CardBody>
-                <ListingFields values={values} onChange={setValues} errors={errors} brands={brands} hasPhone={!!user.phone} />
+                <ListingFields values={values} onChange={setValues} errors={errors} brands={brands} />
                 <div className="mt-6 flex justify-end">
                   <Button type="submit" loading={saving}>Save changes</Button>
                 </div>
@@ -189,7 +189,7 @@ export default function ManageListing({ user, brands, listing }: Props) {
         </div>
 
         <Card as="section" className="self-start">
-          <CardHeader title="Buyer messages" description="Reply to buyers by email or phone." />
+          <CardHeader title="Buyer messages" description="Buyers now message you in Messages. Older enquiries are shown below." action={<LinkButton href="/messages" size="sm" variant="secondary"><MessagesSquare className="h-4 w-4" aria-hidden />Open Messages</LinkButton>} />
           {listing.inquiries.length === 0 ? (
             <CardBody><EmptyState title="No messages yet" description="Messages from interested buyers will appear here." className="border-0 py-6" /></CardBody>
           ) : (
@@ -201,10 +201,6 @@ export default function ManageListing({ user, brands, listing }: Props) {
                     <p className="text-xs text-slate-600">{formatDate(i.createdAt, true)}</p>
                   </div>
                   <p className="mt-1 whitespace-pre-line text-sm text-slate-700">{i.message}</p>
-                  <div className="mt-2 flex flex-wrap gap-3 text-sm">
-                    <a href={`mailto:${i.customer.email}?subject=${encodeURIComponent(`Re: ${listing.title}`)}`} className="link inline-flex items-center gap-1"><Mail className="h-3.5 w-3.5" aria-hidden />Email</a>
-                    {i.customer.phone && <a href={`tel:${i.customer.phone}`} className="link inline-flex items-center gap-1"><Phone className="h-3.5 w-3.5" aria-hidden />{i.customer.phone}</a>}
-                  </div>
                 </li>
               ))}
             </ul>

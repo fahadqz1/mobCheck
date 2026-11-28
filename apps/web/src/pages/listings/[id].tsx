@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { GetServerSideProps } from 'next';
-import { BatteryMedium, Box, CalendarDays, ChevronRight, ClipboardCheck, Flag, Hash, MapPin, MessageCircle, MessageSquare, ShieldAlert, Store, Wrench } from 'lucide-react';
+import { BatteryMedium, Box, CalendarDays, ChevronRight, ClipboardCheck, Flag, Hash, MapPin, ShieldAlert, Store, Wrench } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { getSsrUser } from '@/lib/ssr-auth';
 import { serialize } from '@/lib/serialize';
@@ -12,13 +12,14 @@ import { Card } from '@/components/ui/Card';
 import { Alert, Badge } from '@/components/ui/Feedback';
 import { Button, LinkButton } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { ChatButton } from '@/components/chat/ChatButton';
 import { Field, Select, Textarea } from '@/components/ui/Form';
 import { Avatar } from '@/components/ui/Avatar';
 import { useToast } from '@/components/ui/Toast';
 import { api, ApiError } from '@/lib/client';
 import { listingCardInclude } from '@/lib/queries';
 import { toListingCard, type ListingCard as ListingCardData } from '@/lib/listing';
-import { CONDITION_LABEL, fileUrl, formatDate, formatPKR, listingRef, PTA_LABEL, PTA_TONE, whatsappLink } from '@/lib/format';
+import { CONDITION_LABEL, fileUrl, formatDate, formatPKR, listingRef, PTA_LABEL, PTA_TONE } from '@/lib/format';
 import { useAuth } from '@/context/AuthContext';
 
 type Listing = {
@@ -46,7 +47,7 @@ type Listing = {
   model: { name: string };
   photos: { id: string; url: string }[];
   shop: { name: string; slug: string; status: string } | null;
-  seller: { id: string; name: string; memberSince: string; activeListings: number; rating: number | null; city: string | null; whatsapp: string | null };
+  seller: { id: string; name: string; memberSince: string; activeListings: number; rating: number | null; city: string | null };
 };
 
 type Props = { listing: Listing; similar: ListingCardData[]; isOwner: boolean; user: any };
@@ -61,7 +62,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       model: { select: { name: true } },
       photos: { orderBy: [{ isPrimary: 'desc' }, { uploadSequence: 'asc' }], select: { id: true, storageKey: true } },
       shop: { select: { name: true, slug: true, status: true } },
-      user: { select: { id: true, firstName: true, lastName: true, phone: true, createdAt: true, customerProfile: { select: { averageRating: true, city: true } } } },
+      user: { select: { id: true, firstName: true, lastName: true, createdAt: true, customerProfile: { select: { averageRating: true, city: true } } } },
     },
   });
   const isOwner = !!user && l?.userId === user.id;
@@ -87,7 +88,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           })),
         ];
 
-  const showWhatsapp = !!l.user.phone && l.sellerContactPreference !== 'PLATFORM';
   const listing: Listing = {
     id: l.id,
     title: l.title,
@@ -120,8 +120,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       activeListings,
       rating: l.user.customerProfile?.averageRating ? Number(l.user.customerProfile.averageRating) : null,
       city: l.user.customerProfile?.city ?? null,
-      // The number is only sent to signed-in visitors.
-      whatsapp: showWhatsapp && user ? l.user.phone : showWhatsapp ? 'hidden' : null,
     },
   };
   return { props: serialize({ listing, similar: similar.map(toListingCard), isOwner, user }) };
@@ -129,10 +127,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
 
 export default function ListingDetail({ listing, similar, isOwner }: Props) {
   const { user } = useAuth();
-  const [contactOpen, setContactOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const loginHref = `/auth/login?next=${encodeURIComponent(`/listings/${listing.id}`)}`;
-  const name = `${listing.brand.name} ${listing.model.name}`;
   const sold = listing.status === 'SOLD';
 
   const specs: [string, React.ReactNode][] = [
@@ -212,20 +208,7 @@ export default function ListingDetail({ listing, similar, isOwner }: Props) {
                 </div>
               ) : !sold ? (
                 <div className="mt-5 grid gap-2">
-                  {user ? (
-                    <Button size="lg" onClick={() => setContactOpen(true)}><MessageSquare className="h-4 w-4" aria-hidden />Contact seller</Button>
-                  ) : (
-                    <LinkButton href={loginHref} size="lg"><MessageSquare className="h-4 w-4" aria-hidden />Log in to contact seller</LinkButton>
-                  )}
-                  {listing.seller.whatsapp && (
-                    listing.seller.whatsapp === 'hidden' ? (
-                      <LinkButton href={loginHref} variant="whatsapp" size="lg"><MessageCircle className="h-4 w-4" aria-hidden />Log in for WhatsApp</LinkButton>
-                    ) : (
-                      <a href={whatsappLink(listing.seller.whatsapp, `Hi, is your ${name} (${listingRef(listing.id)}) on MobCheck still available?`)} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#157a3f] px-6 text-base font-medium text-white hover:bg-[#106533]">
-                        <MessageCircle className="h-4 w-4" aria-hidden />WhatsApp seller
-                      </a>
-                    )
-                  )}
+                  <ChatButton kind="LISTING" refId={listing.id} label="Chat with seller" />
                   <LinkButton href={user ? `/bookings/new?listing=${listing.id}` : `/auth/login?next=${encodeURIComponent(`/bookings/new?listing=${listing.id}`)}`} variant="outline" size="lg">
                     <ClipboardCheck className="h-4 w-4" aria-hidden />Book a MobCheck inspection
                   </LinkButton>
@@ -282,7 +265,6 @@ export default function ListingDetail({ listing, similar, isOwner }: Props) {
         )}
       </div>
 
-      <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} listingId={listing.id} name={name} />
       <ReportModal open={reportOpen} onClose={() => setReportOpen(false)} listingId={listing.id} />
     </SiteLayout>
   );
@@ -297,44 +279,6 @@ function InfoRow({ icon: Icon, title, text, muted }: { icon: any; title: string;
         <p className={muted ? 'text-sm text-slate-600' : 'text-sm text-slate-700'}>{text}</p>
       </div>
     </div>
-  );
-}
-
-function ContactModal({ open, onClose, listingId, name }: { open: boolean; onClose: () => void; listingId: string; name: string }) {
-  const [message, setMessage] = useState(`Hi, is your ${name} still available? I'd like to see it.`);
-  const [error, setError] = useState('');
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
-  const send = async () => {
-    setSending(true);
-    setError('');
-    try {
-      await api(`/api/listings/${listingId}/inquiries`, { body: { message } });
-      setSent(true);
-    } catch (err) {
-      setError((err as ApiError).fields?.message || (err as ApiError).message);
-    } finally {
-      setSending(false);
-    }
-  };
-  const close = () => {
-    onClose();
-    setTimeout(() => setSent(false), 200);
-  };
-  return (
-    <Modal
-      open={open}
-      onClose={close}
-      title={sent ? 'Message sent' : 'Contact the seller'}
-      description={sent ? undefined : 'The seller will see your name and email address and reply to you directly.'}
-      footer={sent ? <Button onClick={close}>Done</Button> : (<><Button variant="outline" onClick={close}>Cancel</Button><Button onClick={send} loading={sending}>Send message</Button></>)}
-    >
-      {sent ? (
-        <Alert tone="success" title="Your message is with the seller">You&apos;ll hear back by email or phone. Don&apos;t pay anything before seeing the phone.</Alert>
-      ) : (
-        <Field label="Message" error={error}>{(p) => <Textarea {...p} rows={4} value={message} onChange={(e) => setMessage(e.target.value)} maxLength={1000} />}</Field>
-      )}
-    </Modal>
   );
 }
 

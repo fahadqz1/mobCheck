@@ -8,6 +8,7 @@ import { Alert, Badge } from '@/components/ui/Feedback';
 import { Gallery } from '@/components/media/Gallery';
 import { Stars } from '@/components/ui/Rating';
 import { ComplaintModal } from '@/components/shops/ComplaintModal';
+import { ChatButton } from '@/components/chat/ChatButton';
 import { ASSESSMENT, BOOKING_STATUS, bookingRef, CHECK_RESULT, formatDate, formatPKR, fullName, PTA_LABEL } from '@/lib/format';
 import { cn } from '@/lib/cn';
 import { CustomerActions } from './CustomerActions';
@@ -126,7 +127,6 @@ export function BookingDetail({ booking }: { booking: BookingView }) {
               <Info icon={User} label={booking.party === 'customer' ? 'Inspector' : 'Customer'} value={booking.party === 'customer' ? booking.inspectorName || 'Not assigned yet' : fullName(booking.customer)} />
               {booking.party !== 'customer' && booking.customer.phone && <Info icon={Phone} label="Customer phone" value={<a className="link" href={`tel:${booking.customer.phone}`}>{booking.customer.phone}</a>} />}
               {booking.party !== 'customer' && booking.customer.email && <Info icon={Mail} label="Customer email" value={<a className="link break-all" href={`mailto:${booking.customer.email}`}>{booking.customer.email}</a>} />}
-              {booking.party === 'customer' && <Info icon={Phone} label="Shop phone" value={<a className="link" href={`tel:${booking.shop.phone}`}>{booking.shop.phone}</a>} />}
               {booking.party !== 'customer' && booking.inspectorName && <Info icon={User} label="Inspector" value={booking.inspectorName} />}
             </CardBody>
           </Card>
@@ -194,6 +194,9 @@ export function BookingDetail({ booking }: { booking: BookingView }) {
         </div>
 
         <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
+          {(booking.party === 'customer' || booking.party === 'shop') && !['AWAITING_PAYMENT', 'CANCELLED'].includes(booking.status) && (
+            <ChatButton kind="BOOKING" refId={booking.id} label={booking.party === 'customer' ? 'Message the shop' : 'Message the customer'} variant="secondary" size="md" className="w-full" />
+          )}
           {booking.party === 'customer' && <CustomerActions booking={booking} />}
           {booking.party === 'shop' && <ShopActions booking={booking} />}
           {booking.party === 'inspector' && <InspectorActions booking={booking} />}

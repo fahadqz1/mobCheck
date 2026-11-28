@@ -17,7 +17,7 @@ type Props = { user: ClientUser; brands: BrandOption[] };
 export const getServerSideProps: GetServerSideProps = (ctx) =>
   requirePageAuth(ctx, ['CUSTOMER', 'SELLER', 'SHOP_OWNER'], async () => ({ brands: await loadBrandOptions() }));
 
-export default function NewListing({ user, brands }: Props) {
+export default function NewListing({ brands }: Props) {
   const router = useRouter();
   const [values, setValues] = useState<ListingFormValues>(emptyListing);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -84,7 +84,7 @@ export default function NewListing({ user, brands }: Props) {
                 onRemove={(id) => setPhotos((p) => p.filter((x) => x.id !== id))}
               />
             </section>
-            <ListingFields values={values} onChange={setValues} errors={errors} brands={brands} hasPhone={!!user.phone} />
+            <ListingFields values={values} onChange={setValues} errors={errors} brands={brands} />
           </Card>
           <div className="sticky bottom-0 z-10 -mx-4 mt-6 flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50/95 px-4 py-4 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
             {status && <span className="mr-auto text-sm text-slate-600" aria-live="polite">{status}</span>}
