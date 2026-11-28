@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { BadgeCheck, Clock, MapPin } from 'lucide-react';
+import { ArrowUpRight, BadgeCheck, Clock, MapPin, Star } from 'lucide-react';
 import { Rating } from '@/components/ui/Rating';
 import { initials } from '@/components/ui/Avatar';
 
@@ -41,8 +41,14 @@ export function ShopCover({ url, name, className = 'h-28' }: { url: string | nul
 
 export function ShopCard({ shop }: { shop: ShopCardData }) {
   return (
-    <Link href={`/shops/${shop.slug}`} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-raised" data-testid="shop-card">
-      <ShopCover url={shop.coverUrl} name={shop.name} />
+    <Link href={`/shops/${shop.slug}`} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-card transition duration-300 hover:-translate-y-1 hover:border-ink/20 hover:shadow-raised" data-testid="shop-card">
+      <div className="relative">
+        <ShopCover url={shop.coverUrl} name={shop.name} className="h-32 transition duration-500 group-hover:scale-[1.03]" />
+        <span className="glass absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold text-ink">
+          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
+          {shop.averageRating ? shop.averageRating.toFixed(1) : 'New'}
+        </span>
+      </div>
       <div className="flex flex-1 flex-col px-4 pb-4">
         <div className="relative z-10 -mt-7 flex items-end gap-3">
           <ShopLogo name={shop.name} url={shop.logoUrl} />
@@ -55,9 +61,17 @@ export function ShopCard({ shop }: { shop: ShopCardData }) {
         {shop.openingHour && shop.closingHour && (
           <p className="mt-1 flex items-center gap-1 text-sm text-slate-600"><Clock className="h-3.5 w-3.5 text-slate-400" aria-hidden />{shop.openingHour} – {shop.closingHour}</p>
         )}
-        <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 mt-4">
+        <div className="mt-3 flex flex-wrap gap-1.5 text-[11px] font-semibold">
+          <span className="rounded-full bg-lime-200 px-2.5 py-1 text-ink">Book inspections</span>
+          {shop.servicesCount > 0 && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">{shop.servicesCount} services</span>}
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">{shop.completedInspections} inspections done</span>
+        </div>
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-3 mt-4">
           <Rating value={shop.averageRating} count={shop.totalReviews} />
-          <span className="text-xs text-slate-600">{shop.completedInspections} inspections</span>
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-ink">
+            View shop
+            <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-full bg-ink text-lime-300 transition group-hover:translate-x-0.5"><ArrowUpRight className="h-3.5 w-3.5" /></span>
+          </span>
         </div>
       </div>
     </Link>

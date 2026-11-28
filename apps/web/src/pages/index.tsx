@@ -118,7 +118,7 @@ export default function Home({ listings, shops, brands, reviews, fee, checks }: 
           <div className="relative overflow-hidden rounded-[32px] bg-lime-300 px-6 py-10 sm:px-10 sm:py-14">
             <div aria-hidden className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/40 blur-3xl" />
             <p className="relative inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1 text-xs font-semibold text-lime-300">
-              <ShieldCheck className="h-3.5 w-3.5" aria-hidden />Pakistan&apos;s phone inspection marketplace
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden />Pakistan&apos;s 1st Phone Inspection Marketplace
             </p>
             <h1 className="display relative mt-5 max-w-xl text-[44px] leading-[0.95] sm:text-6xl lg:text-[72px]">Check it.<br />Then buy it.</h1>
             <p className="relative mt-5 max-w-md text-base text-ink/80 sm:text-lg">

@@ -38,6 +38,8 @@ const PTA = ['APPROVED', 'NON_PTA'];
 
 export function buildListingWhere(params: URLSearchParams): Prisma.PhoneListingWhereInput {
   const where: Prisma.PhoneListingWhereInput = { status: 'ACTIVE' };
+  const ids = params.get('ids');
+  if (ids) where.id = { in: ids.split(',').filter((x) => /^[a-z0-9]{10,40}$/.test(x)).slice(0, 100) };
   const q = params.get('q')?.trim();
   if (q) {
     where.OR = [
