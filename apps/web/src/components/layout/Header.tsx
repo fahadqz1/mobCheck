@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ArrowRight, BadgeCheck, ChevronDown, ClipboardCheck, LogOut, Menu, Plus, Search, ShieldCheck, Smartphone, Store, Tag, X } from 'lucide-react';
+import { ArrowRight, ChevronDown, ClipboardCheck, ExternalLink, LogOut, Menu, Plus, Search, ShieldCheck, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { dashboardNav, ROLE_LABEL } from '@/lib/nav';
 import { cn } from '@/lib/cn';
+import { PTA_STATUS_URL } from '@/lib/help-content';
 import { LinkButton, Button } from '@/components/ui/Button';
 import { Dropdown, menuItemClass } from '@/components/ui/Dropdown';
 import { Avatar } from '@/components/ui/Avatar';
 import { Logo } from './Logo';
 import { NotificationBell } from './NotificationBell';
+import { MessagesLink } from './MessagesLink';
 
 const primaryNav = [
   { href: '/marketplace', label: 'Buy a phone' },
@@ -17,19 +19,65 @@ const primaryNav = [
   { href: '/verify', label: 'Verify a report' },
 ];
 
-const categories = [
-  { href: '/marketplace', label: 'All phones', icon: Smartphone },
+// Category row follows the pattern of phone marketplaces (PriceOye, Swappa, Back Market):
+// one "Phones" menu with brand / budget / condition groups, then plain-text quick tabs.
+const PHONE_MENU = [
+  {
+    title: 'Brands',
+    links: [
+      { href: '/marketplace', label: 'All phones' },
+      { href: '/marketplace?brand=apple', label: 'iPhone' },
+      { href: '/marketplace?brand=samsung', label: 'Samsung' },
+      { href: '/marketplace?brand=google-pixel', label: 'Google Pixel' },
+      { href: '/marketplace?brand=oneplus', label: 'OnePlus' },
+    ],
+  },
+  {
+    title: 'Budget',
+    links: [
+      { href: '/marketplace?maxPrice=50000', label: 'Under Rs 50,000' },
+      { href: '/marketplace?minPrice=50000&maxPrice=100000', label: 'Rs 50,000 – 1 lakh' },
+      { href: '/marketplace?minPrice=100000&maxPrice=200000', label: 'Rs 1 – 2 lakh' },
+      { href: '/marketplace?minPrice=200000', label: 'Above Rs 2 lakh' },
+    ],
+  },
+  {
+    title: 'Condition',
+    links: [
+      { href: '/marketplace?pta=APPROVED', label: 'PTA approved' },
+      { href: '/marketplace?condition=BRAND_NEW', label: 'Brand new' },
+      { href: '/marketplace?condition=LIKE_NEW', label: 'Like new' },
+      { href: '/marketplace?condition=EXCELLENT', label: 'Excellent' },
+    ],
+  },
+];
+const quickTabs = [
   { href: '/marketplace?brand=apple', label: 'iPhone' },
   { href: '/marketplace?brand=samsung', label: 'Samsung' },
   { href: '/marketplace?brand=google-pixel', label: 'Google Pixel' },
   { href: '/marketplace?brand=oneplus', label: 'OnePlus' },
-  { href: '/marketplace?pta=APPROVED', label: 'PTA approved', icon: BadgeCheck },
+  { href: '/marketplace?pta=APPROVED', label: 'PTA approved' },
 ];
 const services = [
-  { href: '/shops', label: 'Inspection shops', icon: Store },
-  { href: '/listings/new', label: 'Sell a phone', icon: Tag },
-  { href: '/verify', label: 'Verify a report', icon: ShieldCheck },
+  { href: '/shops', label: 'Inspection shops' },
+  { href: '/listings/new', label: 'Sell a phone' },
+  { href: '/verify', label: 'Verify a report' },
 ];
+const tabClass = (active: boolean) =>
+  cn('inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[13px] font-medium transition-colors', active ? 'bg-ink text-white' : 'text-slate-700 hover:bg-ink/5 hover:text-ink');
+
+// `relative` keeps the sr-only text from escaping the scrolling chip row and widening the page.
+const PTA_TITLE = 'Check a phone on the official PTA DIRBS website (opens in a new tab). MobCheck is not affiliated with PTA.';
+
+function PtaStatusLink({ className }: { className: string }) {
+  return (
+    <a href={PTA_STATUS_URL} target="_blank" rel="noopener noreferrer" title={PTA_TITLE} className={cn('relative', className)} data-testid="pta-status-link">
+      PTA Status
+      <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+      <span className="sr-only"> (opens in a new tab)</span>
+    </a>
+  );
+}
 
 const canSell = (role?: string) => role === 'CUSTOMER' || role === 'SELLER' || role === 'SHOP_OWNER';
 
@@ -64,19 +112,59 @@ export function Header() {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
+  const [phonesOpen, setPhonesOpen] = useState(false);
+  const phonesBtn = useRef<HTMLButtonElement>(null);
+  const phonesPanel = useRef<HTMLDivElement>(null);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout>>();
+  const onHome = router.pathname === '/';
 
   useEffect(() => {
-    const close = () => setMobileOpen(false);
+    const close = () => {
+      setMobileOpen(false);
+      setPhonesOpen(false);
+    };
     router.events.on('routeChangeStart', close);
     return () => router.events.off('routeChangeStart', close);
   }, [router.events]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 8);
+      setPastHero(window.scrollY > 520);
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!phonesOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setPhonesOpen(false);
+        phonesBtn.current?.focus();
+      }
+    };
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (!phonesPanel.current?.contains(t) && !phonesBtn.current?.contains(t)) setPhonesOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onDown);
+    };
+  }, [phonesOpen]);
+  const hoverOpen = () => {
+    clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setPhonesOpen(true), 120);
+  };
+  const hoverClose = () => {
+    clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setPhonesOpen(false), 200);
+  };
 
   const isActive = (href: string) => {
     const [path, qs] = href.split('?');
@@ -102,7 +190,9 @@ export function Header() {
       <header className={cn('glass-strong sticky top-0 z-40 border-x-0 border-t-0 border-b border-ink/10 transition-shadow', scrolled ? 'shadow-raised' : 'shadow-none')}>
         <div className="page-container flex h-16 items-center gap-4 lg:gap-6">
           <Logo />
-          <SearchPill className="hidden max-w-xl flex-1 md:block" />
+          {/* On the home page the hero has its own search, so the header one waits until the hero scrolls away.
+              `invisible` keeps its space so nothing shifts. */}
+          <SearchPill className={cn('hidden max-w-xl flex-1 transition-all duration-300 md:block', onHome && !pastHero && 'md:invisible md:-translate-y-1 md:opacity-0')} />
 
           {/* Fixed-width slot: auth controls never shift the layout while the session loads. */}
           <div className="ml-auto flex min-w-[196px] items-center justify-end gap-2" data-testid="header-auth">
@@ -110,6 +200,7 @@ export function Header() {
               <div className="hidden h-10 w-[196px] animate-pulse rounded-full bg-ink/5 md:block" aria-hidden />
             ) : user ? (
               <>
+                {user.role !== 'INSPECTOR' && <MessagesLink />}
                 <NotificationBell />
                 {canSell(user.role) && (
                   <LinkButton href="/listings/new" variant="accent" className="hidden md:inline-flex">
@@ -177,50 +268,94 @@ export function Header() {
           </div>
         </div>
 
-        <nav aria-label="Categories" className="hidden border-t border-ink/5 md:block">
+        <nav aria-label="Categories" className="relative hidden border-t border-ink/5 md:block" onMouseLeave={hoverClose}>
           <ul className="page-container no-scrollbar flex h-11 items-center gap-1 overflow-x-auto">
-            {categories.map((c) => (
+            <li onMouseEnter={hoverOpen}>
+              <button
+                ref={phonesBtn}
+                type="button"
+                aria-expanded={phonesOpen}
+                aria-controls="phones-menu"
+                onClick={() => {
+                  clearTimeout(hoverTimer.current);
+                  setPhonesOpen((v) => !v);
+                }}
+                className={tabClass(phonesOpen || isActive('/marketplace'))}
+              >
+                Phones
+                <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', phonesOpen && 'rotate-180')} aria-hidden />
+              </button>
+            </li>
+            {quickTabs.map((c) => (
               <li key={c.href}>
-                <Link
-                  href={c.href}
-                  aria-current={isActive(c.href) ? 'page' : undefined}
-                  className={cn('inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[13px] font-medium transition-colors', isActive(c.href) ? 'bg-ink text-white' : 'text-slate-700 hover:bg-ink/5 hover:text-ink')}
-                >
-                  {c.icon && <c.icon className="h-3.5 w-3.5" aria-hidden />}
-                  {c.label}
-                </Link>
+                <Link href={c.href} aria-current={isActive(c.href) ? 'page' : undefined} className={tabClass(isActive(c.href))}>{c.label}</Link>
               </li>
             ))}
-            <li aria-hidden className="mx-2 h-5 w-px bg-ink/10" />
+            <li aria-hidden className="mx-2 h-5 w-px shrink-0 bg-ink/10" />
             {services.filter((c) => !(c.href === '/listings/new' && user && canSell(user.role))).map((c) => (
               <li key={c.href}>
-                <Link
-                  href={c.href}
-                  aria-current={isActive(c.href) ? 'page' : undefined}
-                  className={cn('inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[13px] font-medium transition-colors', isActive(c.href) ? 'bg-ink text-white' : 'text-slate-700 hover:bg-ink/5 hover:text-ink')}
-                >
-                  <c.icon className="h-3.5 w-3.5" aria-hidden />
-                  {c.label}
-                </Link>
+                <Link href={c.href} aria-current={isActive(c.href) ? 'page' : undefined} className={tabClass(isActive(c.href))}>{c.label}</Link>
               </li>
             ))}
+            <li>
+              <PtaStatusLink className={tabClass(false)} />
+            </li>
           </ul>
+
+          {phonesOpen && (
+            <div
+              id="phones-menu"
+              ref={phonesPanel}
+              onMouseEnter={() => clearTimeout(hoverTimer.current)}
+              className="absolute inset-x-0 top-full z-40 border-b border-ink/10 bg-white shadow-overlay"
+              data-testid="phones-menu"
+            >
+              <div className="page-container grid grid-cols-4 gap-8 py-6">
+                {PHONE_MENU.map((group) => (
+                  <div key={group.title}>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">{group.title}</p>
+                    <ul className="mt-3 space-y-1">
+                      {group.links.map((l) => (
+                        <li key={l.href}>
+                          <Link href={l.href} onClick={() => setPhonesOpen(false)} className="-mx-2 block rounded-lg px-2 py-1.5 text-sm font-medium text-ink hover:bg-ink/5">{l.label}</Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+                <Link href="/shops" onClick={() => setPhonesOpen(false)} className="group flex flex-col justify-between gap-4 rounded-3xl bg-lime-300 p-5 text-ink transition hover:-translate-y-0.5">
+                  <ShieldCheck className="h-6 w-6" aria-hidden />
+                  <span>
+                    <span className="block font-semibold">Found a phone you like?</span>
+                    <span className="mt-1 block text-sm text-ink/75">Get it inspected at a verified shop before you pay.</span>
+                    <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold">Find a shop <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden /></span>
+                  </span>
+                </Link>
+              </div>
+            </div>
+          )}
         </nav>
 
         {mobileOpen && (
           <div id="mobile-nav" className="max-h-[calc(100vh-6rem)] overflow-y-auto border-t border-ink/10 bg-white md:hidden">
             <nav aria-label="Mobile" className="page-container space-y-1 py-4">
               <SearchPill className="mb-3" />
-              <div className="no-scrollbar -mx-4 mb-2 flex gap-2 overflow-x-auto px-4 pb-1">
-                {categories.slice(1).map((c) => (
-                  <Link key={c.href} href={c.href} className="shrink-0 rounded-full bg-ink/5 px-3 py-1.5 text-sm font-medium text-ink">{c.label}</Link>
-                ))}
-              </div>
+              {PHONE_MENU.map((group) => (
+                <div key={group.title} className="pb-2">
+                  <p className="px-1 pb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-600">{group.title}</p>
+                  <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+                    {group.links.map((c) => (
+                      <Link key={c.href} href={c.href} className="shrink-0 rounded-full bg-ink/5 px-3 py-1.5 text-sm font-medium text-ink">{c.label}</Link>
+                    ))}
+                  </div>
+                </div>
+              ))}
               {primaryNav.map((item) => (
                 <Link key={item.href} href={item.href} className={cn('block rounded-xl px-3 py-2.5 text-base font-semibold', isActive(item.href) ? 'bg-lime-200 text-ink' : 'text-ink hover:bg-ink/5')}>
                   {item.label}
                 </Link>
               ))}
+              <PtaStatusLink className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-base font-semibold text-ink hover:bg-ink/5" />
               {user && (
                 <>
                   <div className="my-2 border-t border-slate-100" />

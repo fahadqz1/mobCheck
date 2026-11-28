@@ -9,7 +9,7 @@ const points = [
 
 export function AuthShell({ title, subtitle, children }: { title: string; subtitle?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <SiteLayout title={title} footer={false}>
+    <SiteLayout title={title}>
       <div className="page-container grid gap-10 py-10 sm:py-16 lg:grid-cols-[1fr_440px] lg:gap-16">
         <section className="hidden lg:block">
           <h2 className="max-w-md text-3xl font-semibold leading-tight">Buy used phones with the facts in front of you.</h2>

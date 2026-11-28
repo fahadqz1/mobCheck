@@ -49,7 +49,7 @@ export function DashboardLayout({ title, description, actions, children }: { tit
   const active = (href: string) => (href === '/dashboard' ? router.pathname === href : router.pathname === href || router.pathname.startsWith(`${href}/`));
 
   return (
-    <SiteLayout title={title} footer={false}>
+    <SiteLayout title={title}>
       <div className="page-container py-6 lg:grid lg:grid-cols-[220px_1fr] lg:gap-8 lg:py-8">
         <aside className="mb-6 lg:mb-0">
           <nav aria-label="Dashboard" className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 lg:sticky lg:top-24 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0">
