@@ -4,7 +4,7 @@
 const DIGIT_WORDS: Record<string, string> = {
   zero: '0', oh: '0', one: '1', two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8', nine: '9',
   // Romanised Urdu
-  sifr: '0', aik: '1', ek: '1', do: '2', teen: '3', char: '4', chaar: '4', panch: '5', paanch: '5', chay: '6', che: '6', saat: '7', aath: '8', ath: '8', nau: '9', no: '9',
+  sifr: '0', sifar: '0', sefar: '0', aik: '1', ek: '1', do: '2', teen: '3', char: '4', chaar: '4', panch: '5', paanch: '5', chay: '6', che: '6', saat: '7', aath: '8', ath: '8', nau: '9', no: '9',
 };
 
 const toAsciiDigits = (s: string) =>

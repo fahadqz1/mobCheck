@@ -17,7 +17,8 @@
 | Input validation | Zod on every write endpoint with per-field errors | AUTH-10, J-07 |
 | File uploads | Type decided by magic bytes (JPEG/PNG/WebP only), 8 MB limit, random file names, path-traversal-safe key regex, `nosniff` | J-01, J-06, J-09 |
 | Private evidence | `/api/files/evidence/*` only for the booking's customer, shop owner, inspector and admins | Code review |
-| Personal data exposure | Seller phone numbers only to signed-in users; customer contact details only to the shop after payment; public report omits IMEI, photos and buyer | J-02, J-08, J-11 |
+| Personal data exposure | No user or shop phone number or email is shown on any page; people talk through MobCheck Messages, where numbers, emails and outside chat links are blocked server-side. Public report omits IMEI, photos and buyer | J-02, J-08, J-11, FEAT-02, FEAT-05 |
+| Photo privacy | Uploaded photos are re-encoded with EXIF/GPS removed and watermarked; chat photos visible only to participants (pending ones only to the sender and staff) | FEAT-03, FEAT-04 |
 | Webhooks | HMAC-SHA256 over the raw body, constant-time comparison, secret mandatory in production, idempotent by event id | J-07, J-12 |
 | Concurrency | Booking transitions use conditional `updateMany` so double clicks or racing users cannot apply two transitions | Code review |
 | Headers | `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`; `X-Powered-By` removed | Code review |

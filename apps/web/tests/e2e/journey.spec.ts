@@ -203,7 +203,8 @@ test('J-08 shop accepts and assigns the inspector', async ({ page }) => {
   await expect(page.getByTestId('toast').filter({ hasText: 'Booking accepted' })).toBeVisible();
   await page.getByLabel('Inspector').selectOption({ label: 'Imran Inspector' });
   await page.getByRole('button', { name: 'Assign inspector' }).click();
-  await expect(page.getByText('Inspector assigned', { exact: true }).first()).toBeVisible();
+  // Wait for the save itself: 'Inspector assigned' is also a step name on the booking timeline.
+  await expect(page.getByTestId('toast').filter({ hasText: 'Inspector assigned' })).toBeVisible({ timeout: 30_000 });
 });
 
 test('J-09 inspector completes the checklist with photos and issues the report', async ({ page }) => {

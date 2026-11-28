@@ -6,12 +6,12 @@
 
 | Role | Features |
 |---|---|
-| Buyers & sellers | Browse and filter phones (search, city, brand, condition, PTA, price, sort), listing detail with photo gallery, contact seller, WhatsApp, report listing, sell a phone with photos, manage listings and buyer messages |
+| Buyers & sellers | Browse and filter phones (search, city, brand, condition, PTA, price, sort), listing detail with photo gallery, chat with the seller in MobCheck Messages (phone numbers and emails blocked), report listing, save phones, sell a phone with watermarked photos, manage listings |
 | Customers | Book an inspection at a verified shop, pay (sandbox checkout), track progress, read the report with photo evidence, confirm or dispute within the review window, review the shop, file complaints, notifications |
 | Shop owners | Register shop (verified by MobCheck), logo/cover/gallery, services and prices, inspectors (with their own logins), accept/decline bookings, assign inspectors, payouts per booking, reviews, subscription |
 | Inspectors | Assigned bookings, start inspection, iPhone/Android checklist, annotated photo evidence, submit, generate report |
 | Admins | Platform overview, verify/reject/suspend/reinstate shops, moderate reported listings, resolve disputes and refunds, complaints, suspend users, payments and payouts |
-| Public | Verify any report by number at `/verify` (QR code on every report) |
+| Public | Verify any report by number at `/verify` (QR code on every report); Help assistant and WhatsApp support on every page; PTA Status link to the official DIRBS site |
 
 Not yet connected: a real payment gateway (a signed sandbox stands in), email delivery (reset links are logged in development), PDF export of reports. See [Known issues](docs/engineering/10_KNOWN_ISSUES.md).
 
@@ -41,6 +41,10 @@ npm run web          # terminal 2: http://localhost:3000
 First time only: `npm run db:setup` (migrations + demo data).
 
 Demo accounts (password `Password123`): `admin@mobcheck.pk`, `shop@mobcheck.pk`, `customer@mobcheck.pk`.
+
+## Optional: AI features
+
+Add `ANTHROPIC_API_KEY=...` to `apps/web/.env.local` yourself and restart. This turns on AI answers in the Help widget and automatic checks of chat photos. Without it, Help answers from the built-in FAQ and chat photos wait for staff review at Admin → Chat moderation.
 
 ## Tests
 
