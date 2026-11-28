@@ -45,7 +45,6 @@ test('J-01 seller lists a phone with photos and sees it live', async ({ page }) 
   await page.getByLabel('Description').fill('Lightly used, always in a case.');
   await page.getByLabel('City').selectOption('Lahore');
   await page.getByLabel('Area').fill('Gulberg III');
-  await page.getByLabel('How should buyers contact you?').selectOption('WHATSAPP');
   await page.getByRole('button', { name: 'Publish listing' }).click();
   await expect(page).toHaveURL(/\/listings\/[a-z0-9]+\?created=1/, { timeout: 45_000 });
   state.listingId = page.url().split('/').pop()!.split('?')[0];
@@ -86,19 +85,21 @@ test('J-02 buyer filters the marketplace and opens the listing gallery', async (
   await page.keyboard.press('Escape');
   await expect(viewer).toBeHidden();
 
-  const wa = page.getByRole('link', { name: 'WhatsApp seller' });
-  await expect(wa).toHaveAttribute('href', /wa\.me\/923012345678/);
+  // The seller's phone number must never reach the page; buyers use in-app chat.
+  await expect(page.getByRole('link', { name: /WhatsApp seller/ })).toHaveCount(0);
+  expect(await page.content()).not.toContain('2345678');
   await expect(page.getByRole('heading', { name: 'Similar phones' })).toBeVisible();
 });
 
-test('J-03 buyer contacts and reports the listing; seller sees the message', async ({ page }) => {
+test('J-03 buyer chats with and reports the listing; seller sees the message', async ({ page }) => {
   await login(page, state.buyerEmail);
   await page.goto(`/listings/${state.listingId}`);
-  await page.getByRole('button', { name: 'Contact seller' }).click();
-  await page.getByLabel('Message').fill('Is the price negotiable? I can meet in Gulberg this week.');
+  await page.getByRole('button', { name: 'Chat with seller' }).click();
+  await expect(page).toHaveURL(/\/messages\?c=/, { timeout: 30_000 });
+  await page.getByLabel('Message', { exact: true }).fill('Is the price negotiable? I can meet in Gulberg this week.');
   await page.getByRole('button', { name: 'Send message' }).click();
-  await expect(page.getByText('Your message is with the seller')).toBeVisible();
-  await page.getByRole('button', { name: 'Done' }).click();
+  await expect(page.getByText('Is the price negotiable?')).toBeVisible();
+  await page.goto(`/listings/${state.listingId}`);
   await page.getByRole('button', { name: 'Report this listing' }).click();
   await page.getByLabel('Reason').selectOption('WRONG_PRICE');
   await page.getByRole('button', { name: 'Submit report' }).click();
@@ -106,7 +107,10 @@ test('J-03 buyer contacts and reports the listing; seller sees the message', asy
   await logout(page);
 
   await login(page, state.sellerEmail);
-  await page.goto(`/dashboard/listings/${state.listingId}`);
+  await page.goto('/dashboard');
+  await expect(page.getByTestId('messages-unread')).toHaveText('1');
+  await page.goto('/messages');
+  await page.getByRole('link', { name: /Buyer U\./ }).click();
   await expect(page.getByText('Is the price negotiable?')).toBeVisible();
 });
 
@@ -168,7 +172,7 @@ test('J-06 owner adds branding, a service and an inspector', async ({ page }) =>
   await logout(page);
   await page.goto(`/shops/${state.shopSlug}`);
   await expect(page.getByRole('heading', { level: 1 })).toContainText(shopName);
-  await expect(page.getByText('Verified by MobCheck')).toBeVisible();
+  await expect(page.getByText('Verified by MobCheck', { exact: true })).toBeVisible();
   await expect(page.getByText('iPhone battery replacement')).toBeVisible();
   await expect(page.getByText('1 active inspector')).toBeVisible();
 });
@@ -192,7 +196,9 @@ test('J-08 shop accepts and assigns the inspector', async ({ page }) => {
   await page.goto('/vendor/bookings');
   await page.locator(`a[href="/vendor/bookings/${state.bookingId}"]`).click();
   await expect(page.getByText('Buyer User')).toBeVisible();
-  await expect(page.getByText('0333 7654321')).toBeVisible();
+  // Shops talk to customers through chat; the customer's phone stays private.
+  await expect(page.getByText('0333 7654321')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Message the customer' })).toBeVisible();
   await page.getByRole('button', { name: 'Accept booking' }).click();
   await expect(page.getByTestId('toast').filter({ hasText: 'Booking accepted' })).toBeVisible();
   await page.getByLabel('Inspector').selectOption({ label: 'Imran Inspector' });

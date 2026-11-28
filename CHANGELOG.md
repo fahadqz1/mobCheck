@@ -2,6 +2,29 @@
 
 ## [Unreleased] — branch `feature/liquid-glass-theme` (28 Nov 2026)
 
+### Added — safe messaging, help and trust
+- **MobCheck Messages**: in-app chat between buyers and sellers (from a listing), customers and shops (from a shop profile) and customers and shops about a booking. Unread badge in the header, inbox and thread view on desktop and mobile.
+- **Contact sharing is blocked.** Phone numbers (including spaced, dotted, Urdu/Arabic digits and digits written as words in English or Roman Urdu), email addresses and outside chat links (WhatsApp, Telegram, wa.me…) are refused by the server. The sender sees a warning while typing and a "Not sent" bubble; the other person never receives it. IMEI numbers are still allowed.
+- **Chat photos**: only photos of a phone, its box or accessories. With an AI key they are checked automatically; without one they wait for staff review at **Admin → Chat moderation** (approve/reject, blocked attempts, repeat offenders).
+- **Watermark on every phone photo**: listing photos, chat photos and inspection evidence are resized to at most 1600px, stripped of EXIF/GPS data and stamped with a MobCheck mark.
+- **Help on every page**: a floating Help assistant (instant answers from the help content; AI answers when `ANTHROPIC_API_KEY` is set) with a one-tap **WhatsApp +92 317 4351383** button that pre-fills the question and page. New Help centre page (`/help`).
+- **PTA Status** link in the header chip row (desktop/tablet) and the mobile menu. Opens the official PTA DIRBS site (https://dirbs.pta.gov.pk/) in a new tab; no PTA logo, no API, scraping or IMEI submission, and a tooltip states MobCheck is not affiliated with PTA.
+- **Header tabs redesigned** after comparing phone marketplaces (PriceOye, Swappa, Back Market): a **Phones** menu groups Brands, Budget (under Rs 50,000 … above Rs 2 lakh) and Condition, with an inspection call-to-action; the rest of the row is plain-text tabs (no more mix of tabs with and without icons). Mobile menu shows the same groups.
+- **One search at a time on the home page**: the header search is hidden while the hero search is on screen and slides in after you scroll past it (space is reserved, so nothing jumps). Other pages are unchanged.
+- **New footer** on every page except Messages and Checkout (now also on dashboards and sign-in pages): trust strip, About / Help / Services / For shops columns, WhatsApp support, legal links and a PTA non-affiliation notice.
+- **New pages**: About MobCheck, Terms of use, Privacy policy, Refunds and cancellations. Help centre questions can be linked directly (e.g. `/help#safety`).
+- **Saved phones**: heart button on listing cards, `/saved` page (stored on this device).
+
+### Changed
+- Home badge now reads "Pakistan's 1st Phone Inspection Marketplace".
+- Listing cards: condition grade colour chip, PTA label, save button, larger price, hover arrow. Shop cards: glass rating pill, service and inspection-count chips, "View shop" arrow.
+- Seller, shop and customer phone numbers and emails are no longer shown on listing, shop or booking pages; everyone talks through Messages. The listing form's "contact preference" became a privacy note.
+- Toasts are centred so they don't sit under the Help button.
+
+### Fixed
+- Listing cards could trigger a hydration error when their "N minutes ago" label ticked over between server render and page load.
+- Typing a new chat message while the previous one was still sending could wipe the new text.
+
 ### Changed
 - New visual theme: ink and lime palette with pastel category tiles, Bricolage Grotesque display type, pill buttons and chips, larger radii, warm off-white background.
 - "Liquid glass" surfaces (frosted, blurred panels with a highlight edge and a pointer-following sheen) on the header, hero report card, promise cards and image badges, with solid fallbacks for reduced transparency.

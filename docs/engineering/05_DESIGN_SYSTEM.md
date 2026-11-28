@@ -47,3 +47,14 @@ Under `prefers-reduced-transparency: reduce` glass becomes solid white or ink.
 ## Accessibility guardrails
 
 Text on lime and pastel surfaces is always ink; glass surfaces carry ink text only; focus rings are ink with offset; every interactive element keeps a visible label or accessible name; automated axe checks (WCAG 2.1 AA) run in the regression suite.
+
+## Help, chat and trust patterns (28 Nov 2026)
+
+- **Help button**: fixed bottom-right ink pill with lime ring (`HelpWidget`). Panel is `glass-strong`, max 380px wide on desktop, full width with 12px gutters on phones. Hidden on `/messages` so it never covers the composer. Toasts are centred to avoid it.
+- **WhatsApp**: always `#157a3f` with white text (AA). Use `supportWhatsappLink()` so the message is pre-filled consistently.
+- **Chat bubbles**: own messages ink, others white; a blocked message is a red-outlined bubble with "Not sent: …"; photos waiting for review show a clock and "Waiting for safety check".
+- **Live warning**: red `role="alert"` strip above the composer as soon as a number, email or link is typed.
+- **Condition chips** (listing cards, `GRADE` in `ListingCard.tsx`): Brand new — solid green; Like new — light green; Excellent — sky; Good — amber; Fair — orange; For parts — rose. The photo tile behind each card uses the matching pastel.
+- **Contact rule**: never render a phone number or email of a user or shop in the UI; use `<ChatButton>` instead.
+- **Header category row**: plain-text pill tabs only (active = ink pill). Brands, budget and condition live in the **Phones** menu (solid white panel, opens on hover or click, closes on Escape/outside click/route change). External links (PTA Status) carry an arrow icon and "(opens in a new tab)" for screen readers, and must be `relative` inside scrolling rows.
+- **Footer**: trust strip → brand + WhatsApp → four link columns → legal bar + disclaimer. Do not add claims (payment partners, certifications, registration numbers) that are not true yet.
