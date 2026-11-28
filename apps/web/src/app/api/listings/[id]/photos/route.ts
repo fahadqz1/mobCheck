@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requireUser } from '@/lib/session';
 import { readImage, saveFile, UploadError } from '@/lib/storage';
+import { watermarkPhoto } from '@/lib/watermark';
 import { fileUrl } from '@/lib/format';
 import { serverError } from '@/lib/api';
 
@@ -16,7 +17,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     if (listing._count.photos >= MAX_PHOTOS) return NextResponse.json({ error: `A listing can have up to ${MAX_PHOTOS} photos.` }, { status: 400 });
 
     const form = await request.formData();
-    const image = await readImage(form.get('file') as File | null);
+    const original = await readImage(form.get('file') as File | null);
+    const image = await watermarkPhoto(original.buffer);
     const key = await saveFile(`listings/${listing.id}`, image.buffer, image.ext);
     const photo = await prisma.listingPhoto.create({
       data: {

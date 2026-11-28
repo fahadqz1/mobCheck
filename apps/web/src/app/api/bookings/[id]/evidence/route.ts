@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { requireUser } from '@/lib/session';
 import { loadBookingFor } from '@/lib/bookings';
 import { deleteFile, readImage, saveFile, UploadError } from '@/lib/storage';
+import { watermarkPhoto } from '@/lib/watermark';
 import { fileUrl } from '@/lib/format';
 import { serverError } from '@/lib/api';
 
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     if (count >= MAX_EVIDENCE) return NextResponse.json({ error: `Up to ${MAX_EVIDENCE} photos per inspection.` }, { status: 400 });
 
     const form = await request.formData();
-    const image = await readImage(form.get('file') as File | null);
+    const image = await watermarkPhoto((await readImage(form.get('file') as File | null)).buffer, 'MobCheck inspection');
     const annotationType = String(form.get('annotationType') || '');
     const annotationText = String(form.get('annotationText') || '').slice(0, 300) || null;
     const key = await saveFile(`evidence/${params.id}`, image.buffer, image.ext);
